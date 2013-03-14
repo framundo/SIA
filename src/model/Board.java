@@ -74,31 +74,32 @@ public class Board implements GPSState, Cloneable {
 		tiles[row] = shifted;
 		check();
 	}
-	
+
 	@Override
 	public String toString() {
-		String s="";
+		String s = "";
 		for (int row = 0; row < ROWS; row++) {
 			for (int col = 0; col < COLS; col++) {
-				s+=tiles[row][col] + ", ";
+				s += tiles[row][col] + ", ";
 			}
-			s+="\n";
+			s += "\n";
 		}
-		s+="------------\n";
+		s += "------------\n";
 		return s;
 	}
-
 
 	private void check() {
 		boolean popped = true;
 		while (popped) {
 			popped = false;
-			for (int i = 0; i < ROWS; i++) {
-				for (int j = 0; j < COLS; j++) {
-					Set<Point> colored = adjacentTiles(i, j);
-					if (colored.size() >= 3) {
-						pop(colored);
-						popped = true;
+			for (int row = 0; row < ROWS; row++) {
+				for (int col = 0; col < COLS; col++) {
+					if (tiles[row][col] != EMPTY) {
+						Set<Point> colored = adjacentTiles(row, col);
+						if (colored.size() >= 3) {
+							pop(colored);
+							popped = true;
+						}
 					}
 				}
 			}
@@ -174,7 +175,7 @@ public class Board implements GPSState, Cloneable {
 	}
 
 	private void dropDown(int amount) {
-		for (int row = ROWS - 1; row >= 0; row--) {
+		for (int row = ROWS - 1; row >= amount; row--) {
 			for (int col = 0; col < COLS; col++) {
 				tiles[row][col] = tiles[row - amount][col];
 			}
@@ -185,7 +186,7 @@ public class Board implements GPSState, Cloneable {
 		for (int row = 0; row < ROWS; row++) {
 			for (int col = 0; col < COLS; col++) {
 				Random rand = new Random();
-				tiles[row][col] = rand.nextInt(MAX_COLORS)+1;
+				tiles[row][col] = rand.nextInt(MAX_COLORS) + 1;
 			}
 		}
 	}
@@ -193,11 +194,11 @@ public class Board implements GPSState, Cloneable {
 	private boolean isValidPoint(int row, int col) {
 		return row >= 0 && col >= 0 && row < ROWS && col < COLS;
 	}
-		
+
 	public static void main(String[] args) {
 		Board board = new Board();
 		System.out.println(board);
-		board.shift(3,1);
+		board.shift(3, 1);
 		System.out.println(board);
 	}
 }
