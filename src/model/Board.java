@@ -9,10 +9,10 @@ import java.util.Set;
 
 public class Board implements GPSState, Cloneable {
 
-	private static final int ROWS = 5;
-	private static final int COLS = 5;
+	private static final int ROWS = 10;
+	private static final int COLS = 8;
 	private static final int MAX_MOVEMENTS = 20;
-	private static final int MAX_COLORS = 7;
+	private static final int MAX_COLORS = 5;
 	private static final int EMPTY = 0;
 
 	private int[][] tiles;
@@ -195,9 +195,25 @@ public class Board implements GPSState, Cloneable {
 	}
 		
 	public static void main(String[] args) {
-		Board board = new Board();
+		Board board = generateTestBoard();
 		System.out.println(board);
 		board.shift(3,1);
 		System.out.println(board);
+	}
+	
+	public static Board generateTestBoard(){
+		int[][] tiles = {
+				{1,2,3,4,5,1,2,3},
+				{2,3,4,5,1,2,3,4},
+				{3,4,5,1,2,3,4,5},
+				{4,5,1,2,3,4,5,1},
+				{5,1,2,3,4,5,1,2},
+				{1,2,3,4,5,1,2,3},
+				{2,3,4,5,1,2,3,4},
+				{3,4,5,1,2,3,4,5},
+				{4,5,1,2,3,4,5,1},
+				{5,1,2,3,4,5,1,2}};
+		Board board = new Board(tiles, 10, 10);
+		return board;
 	}
 }
