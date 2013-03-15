@@ -9,25 +9,29 @@ import java.util.Set;
 
 public class Board implements GPSState, Cloneable {
 
-	private static final int ROWS = 10;
+	private static final int VISIBLE_ROWS = 10;
+	private static final int TOTAL_ROWS = 30;
+	private static final int INITIAL_ROW = 20;
 	private static final int COLS = 8;
 	private static final int MAX_MOVEMENTS = 20;
-	private static final int MAX_COLORS = 5;
+	private static final int MAX_COLORS = 8;
 	private static final int EMPTY = 0;
 
+	private int initialRow;
 	private int[][] tiles;
 	private int movements;
 	private int points;
 
 	private Board(int[][] tiles, int movements, int points) {
+		this.initialRow = INITIAL_ROW;
 		this.tiles = tiles;
 		this.movements = movements;
 		this.points = points;
 	}
 
 	public Board() {
-		tiles = new int[ROWS][COLS];
-		generateRows(ROWS);
+		tiles = new int[TOTAL_ROWS][COLS];
+		generateRows(TOTAL_ROWS);
 	}
 
 	@Override
@@ -39,7 +43,7 @@ public class Board implements GPSState, Cloneable {
 		if (other.movements != movements || other.points != points) {
 			return false;
 		}
-		for (int i = 0; i < ROWS; i++) {
+		for (int i = initialRow; i < initialRow + VISIBLE_ROWS; i++) {
 			for (int j = 0; j < COLS; j++) {
 				if (other.tiles[i][j] != tiles[i][j]) {
 					return false;
@@ -57,8 +61,8 @@ public class Board implements GPSState, Cloneable {
 
 	@Override
 	public Board clone() {
-		int[][] clonedTiles = new int[ROWS][COLS];
-		for (int i = 0; i < ROWS; i++) {
+		int[][] clonedTiles = new int[VISIBLE_ROWS][COLS];
+		for (int i = initialRow; i < initialRow + VISIBLE_ROWS; i++) {
 			for (int j = 0; j < COLS; j++) {
 				clonedTiles[i][j] = this.tiles[i][j];
 			}
@@ -69,16 +73,16 @@ public class Board implements GPSState, Cloneable {
 	public void shift(int row, int amount) {
 		int[] shifted = new int[COLS];
 		for (int i = 0; i < COLS; i++) {
-			shifted[i] = tiles[row][(i + amount) % COLS];
+			shifted[i] = tiles[initialRow+row][(i + amount) % COLS];
 		}
-		tiles[row] = shifted;
+		tiles[initialRow+row] = shifted;
 		check();
 	}
 
 	@Override
 	public String toString() {
 		String s = "";
-		for (int row = 0; row < ROWS; row++) {
+		for (int row = initialRow; row < initialRow + VISIBLE_ROWS; row++) {
 			for (int col = 0; col < COLS; col++) {
 				s += tiles[row][col] + ", ";
 			}
@@ -92,7 +96,7 @@ public class Board implements GPSState, Cloneable {
 		boolean popped = true;
 		while (popped) {
 			popped = false;
-			for (int row = 0; row < ROWS; row++) {
+			for (int row = initialRow; row < initialRow + VISIBLE_ROWS; row++) {
 				for (int col = 0; col < COLS; col++) {
 					if (tiles[row][col] != EMPTY) {
 						Set<Point> colored = adjacentTiles(row, col);
@@ -137,16 +141,16 @@ public class Board implements GPSState, Cloneable {
 		for (int col = 0; col < COLS; col++) {
 			int row = 0;
 			int emptySpace;
-			while (row < ROWS && tiles[row][col] != EMPTY) {
+			while (row < initialRow + VISIBLE_ROWS && tiles[row][col] != EMPTY) {
 				row++;
 			}
-			if (row != ROWS) { // encontre un espacio
+			if (row != initialRow + VISIBLE_ROWS) { // encontre un espacio
 				emptySpace = row;
-				while (row < ROWS) {
-					while (row < ROWS && tiles[row][col] == EMPTY) {
+				while (row < initialRow + VISIBLE_ROWS) {
+					while (row < initialRow + VISIBLE_ROWS && tiles[row][col] == EMPTY) {
 						row++;
 					}
-					if (row != ROWS) { // encontre una pelotita
+					if (row != initialRow + VISIBLE_ROWS) { // encontre una pelotita
 						tiles[emptySpace][col] = tiles[row][col];
 						tiles[row][col] = EMPTY;
 						row++;
@@ -160,7 +164,7 @@ public class Board implements GPSState, Cloneable {
 	private void fill() {
 		boolean found = false;
 		int count = 0;
-		for (int row = ROWS - 1; row >= 0 && !found; row--) {
+		for (int row = initialRow + VISIBLE_ROWS - 1; row >= 0 && !found; row--) {
 			for (int col = 0; col < COLS && !found; col++) {
 				found = tiles[row][col] != EMPTY;
 			}
@@ -170,20 +174,23 @@ public class Board implements GPSState, Cloneable {
 		}
 		if (count != 0) {
 			dropDown(count);
-			generateRows(count);
 		}
 	}
 
-	private void dropDown(int amount) {
-		for (int row = ROWS - 1; row >= amount; row--) {
-			for (int col = 0; col < COLS; col++) {
-				tiles[row][col] = tiles[row - amount][col];
-			}
-		}
+//	private void dropDown(int amount) {
+//		for (int row = VISIBLE_ROWS - 1; row >= amount; row--) {
+//			for (int col = 0; col < COLS; col++) {
+//				tiles[row][col] = tiles[row - amount][col];
+//			}
+//		}
+//	}
+	
+	private void dropDown(int amount){
+		this.initialRow -= amount;
 	}
 
 	private void generateRows(int amount) {
-		for (int row = 0; row < ROWS; row++) {
+		for (int row = 0; row < amount; row++) {
 			for (int col = 0; col < COLS; col++) {
 				Random rand = new Random();
 				tiles[row][col] = rand.nextInt(MAX_COLORS) + 1;
@@ -192,28 +199,49 @@ public class Board implements GPSState, Cloneable {
 	}
 
 	private boolean isValidPoint(int row, int col) {
-		return row >= 0 && col >= 0 && row < ROWS && col < COLS;
+		return row >= initialRow && col >= 0 && row < initialRow + VISIBLE_ROWS && col < COLS;
 	}
 
 	public static void main(String[] args) {
 		Board board = generateTestBoard();
 		System.out.println(board);
-		board.shift(3, 1);
+		board.shift(0, 2);
+		board.shift(1, 1);
 		System.out.println(board);
 	}
 	
 	public static Board generateTestBoard(){
 		int[][] tiles = {
-				{1,2,3,4,5,1,2,3},
-				{2,3,4,5,1,2,3,4},
-				{3,4,5,1,2,3,4,5},
-				{4,5,1,2,3,4,5,1},
-				{5,1,2,3,4,5,1,2},
-				{1,2,3,4,5,1,2,3},
-				{2,3,4,5,1,2,3,4},
-				{3,4,5,1,2,3,4,5},
-				{4,5,1,2,3,4,5,1},
-				{5,1,2,3,4,5,1,2}};
+				{1,2,3,4,5,6,7,8},
+				{2,3,4,5,6,7,8,1},
+				{3,4,5,6,7,8,1,2},
+				{4,5,6,7,8,1,2,3},
+				{5,6,7,8,1,2,3,4},
+				{6,7,8,1,2,3,4,5},
+				{7,8,1,2,3,4,5,6},
+				{8,1,2,3,4,5,6,7},
+				{1,2,3,4,5,6,7,8},
+				{2,3,4,5,6,7,8,1},
+				{3,4,5,6,7,8,1,2},
+				{4,5,6,7,8,1,2,3},
+				{5,6,7,8,1,2,3,4},
+				{6,7,8,1,2,3,4,5},
+				{7,8,1,2,3,4,5,6},
+				{8,1,2,3,4,5,6,7},
+				{1,2,3,4,5,6,7,8},
+				{2,3,4,5,6,7,8,1},
+				{3,4,5,6,7,8,1,2},
+				{4,5,6,7,8,1,2,3},
+				{5,6,7,8,1,2,3,4},
+				{6,7,8,1,2,3,4,5},
+				{7,8,1,2,3,4,5,6},
+				{8,1,2,3,4,5,6,7},
+				{3,4,5,6,7,8,1,2},
+				{4,5,6,7,8,1,2,3},
+				{5,6,7,8,1,2,3,4},
+				{6,7,8,1,2,3,4,5},
+				{7,8,1,2,3,4,5,6},
+				{8,1,2,3,4,5,6,7}};
 		Board board = new Board(tiles, 10, 10);
 		return board;
 	}
