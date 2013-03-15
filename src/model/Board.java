@@ -13,7 +13,7 @@ public class Board implements GPSState, Cloneable {
 	private static final int TOTAL_ROWS = 30;
 	private static final int INITIAL_ROW = 20;
 	private static final int COLS = 8;
-	private static final int MAX_MOVEMENTS = 20;
+	private static final int MAX_MOVEMENTS = 2;
 	private static final int MAX_COLORS = 8;
 	private static final int EMPTY = 0;
 
@@ -60,8 +60,8 @@ public class Board implements GPSState, Cloneable {
 
 	@Override
 	public Board clone() {
-		int[][] clonedTiles = new int[VISIBLE_ROWS][COLS];
-		for (int i = initialRow; i < initialRow + VISIBLE_ROWS; i++) {
+		int[][] clonedTiles = new int[TOTAL_ROWS][COLS];
+		for (int i = 0; i < TOTAL_ROWS; i++) {
 			for (int j = 0; j < COLS; j++) {
 				clonedTiles[i][j] = this.tiles[i][j];
 			}

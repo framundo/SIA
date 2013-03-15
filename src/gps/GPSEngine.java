@@ -11,7 +11,7 @@ import java.util.List;
 
 public abstract class GPSEngine {
 
-	private List<GPSNode> open = new LinkedList<GPSNode>();
+	private LinkedList<GPSNode> open = new LinkedList<GPSNode>();
 
 	private List<GPSNode> closed = new ArrayList<GPSNode>();
 
@@ -57,8 +57,7 @@ public abstract class GPSEngine {
 	}
 
 	private  boolean isGoal(GPSNode currentNode) {
-		return currentNode.getState() != null
-				&& currentNode.getState().compare(problem.getGoalState());
+		return currentNode.getState().isGoal();
 	}
 
 	private  boolean explode(GPSNode node) {
@@ -111,5 +110,13 @@ public abstract class GPSEngine {
 	}
 
 	public abstract  void addNode(GPSNode node);
+	
+	public LinkedList<GPSNode> getOpened(){
+		return this.open;
+	}
+	
+	public SearchStrategy getStrategy(){
+		return this.strategy;
+	}
 	
 }
