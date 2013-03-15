@@ -55,8 +55,7 @@ public class Board implements GPSState, Cloneable {
 
 	@Override
 	public boolean isGoal() {
-		// TODO
-		return false;
+		return this.movements <= 0;
 	}
 
 	@Override
@@ -71,6 +70,7 @@ public class Board implements GPSState, Cloneable {
 	}
 
 	public void shift(int row, int amount) {
+		this.movements--;
 		int[] shifted = new int[COLS];
 		for (int i = 0; i < COLS; i++) {
 			shifted[i] = tiles[initialRow+row][(i + amount) % COLS];
@@ -242,7 +242,15 @@ public class Board implements GPSState, Cloneable {
 				{6,7,8,1,2,3,4,5},
 				{7,8,1,2,3,4,5,6},
 				{8,1,2,3,4,5,6,7}};
-		Board board = new Board(tiles, 10, 10);
+		Board board = new Board(tiles, MAX_MOVEMENTS, 0);
 		return board;
+	}
+	
+	public static int getRows(){
+		return VISIBLE_ROWS;
+	}
+	
+	public static int getCols(){
+		return COLS;
 	}
 }
