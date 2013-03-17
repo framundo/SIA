@@ -1,6 +1,7 @@
 package model;
 
 import gps.api.GPSState;
+import gps.exception.NotAppliableException;
 
 import java.awt.Point;
 import java.util.HashSet;
@@ -13,9 +14,10 @@ public class Board implements GPSState, Cloneable {
 	private static final int TOTAL_ROWS = 30;
 	private static final int INITIAL_ROW = 20;
 	private static final int COLS = 8;
-	private static final int MAX_MOVEMENTS = 2;
 	private static final int MAX_COLORS = 8;
 	private static final int EMPTY = 0;
+	private static final int GOAL_POINTS = 10;
+	public static final int MAX_MOVEMENTS = 3;
 
 	private int initialRow;
 	private int[][] tiles;
@@ -55,7 +57,7 @@ public class Board implements GPSState, Cloneable {
 
 	@Override
 	public boolean isGoal() {
-		return this.movements <= 0;
+		return this.points >= GOAL_POINTS;
 	}
 
 	@Override
@@ -69,7 +71,10 @@ public class Board implements GPSState, Cloneable {
 		return new Board(clonedTiles, movements, points);
 	}
 
-	public void shift(int row, int amount) {
+	public void shift(int row, int amount) throws NotAppliableException {
+		if (movements <= 0) {
+			throw new NotAppliableException();
+		}
 		this.movements--;
 		int[] shifted = new int[COLS];
 		for (int i = 0; i < COLS; i++) {
@@ -135,6 +140,7 @@ public class Board implements GPSState, Cloneable {
 		for (Point point : colored) {
 			tiles[point.x][point.y] = EMPTY;
 		}
+		points += Math.pow(2, colored.size()-2)-1;
 	}
 
 	private void lift() {
@@ -202,7 +208,7 @@ public class Board implements GPSState, Cloneable {
 		return row >= initialRow && col >= 0 && row < initialRow + VISIBLE_ROWS && col < COLS;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws NotAppliableException {
 		Board board = generateTestBoard();
 		System.out.println(board);
 		board.shift(0, 2);

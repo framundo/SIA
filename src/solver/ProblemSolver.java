@@ -9,6 +9,6 @@ public class ProblemSolver {
 
 	public static void main(String[] args) {
 		GPSProblem problem = new DeepTripProblem();
-		(new EngineImpl()).engine(problem, SearchStrategy.BFS);
+		(new EngineImpl()).engine(problem, SearchStrategy.ID);
 	}
 }

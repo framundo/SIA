@@ -43,4 +43,11 @@ public class GPSNode {
 		}
 		return this.parent.getSolution() + "\n" + this.state;
 	}
+	
+	public int getHeight() {
+		if (parent == null) {
+			return 0;
+		}
+		return 1 + parent.getHeight();
+	}
 }

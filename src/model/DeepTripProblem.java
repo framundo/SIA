@@ -24,7 +24,7 @@ public class DeepTripProblem implements GPSProblem{
 	public List<GPSRule> getRules() {
 		List<GPSRule> rules = new ArrayList<GPSRule>(Board.getRows()*(Board.getCols()-1));
 		for(int i = 0; i < Board.getRows(); i++){
-			for(int j = 0; j < Board.getCols(); j++){
+			for(int j = 1; j < Board.getCols(); j++){
 				rules.add(new ShiftRule(i,j));
 			}
 		}

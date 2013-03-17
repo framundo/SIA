@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import model.Board;
+
 public abstract class GPSEngine {
 
 	private LinkedList<GPSNode> open = new LinkedList<GPSNode>();
@@ -22,33 +24,47 @@ public abstract class GPSEngine {
 
 	public void engine(GPSProblem myProblem, SearchStrategy myStrategy) {
 
+		long time0 = System.currentTimeMillis();
 		problem = myProblem;
 		strategy = myStrategy;
+		int iterativeDepth = 1;
+		int openSize = 0;
 
 		GPSNode rootNode = new GPSNode(problem.getInitState(), 0);
 		boolean finished = false;
 		boolean failed = false;
-		long explosionCounter = 0;
 
 		open.add(rootNode);
 		while (!failed && !finished) {
-			if (open.size() <= 0) {
-				failed = true;
+			if (open.isEmpty()) {
+				if (myStrategy == SearchStrategy.ID && iterativeDepth < Board.MAX_MOVEMENTS) { // Tengo que aumentar el nivel si o si
+					iterativeDepth++;
+					openSize += open.size();
+					open = new LinkedList<GPSNode>();
+					open.add(rootNode);
+				} else {
+					failed = true;
+				}
 			} else {
 				GPSNode currentNode = open.get(0);
 				closed.add(currentNode);
 				open.remove(0);
 				if (isGoal(currentNode)) {
 					finished = true;
+					openSize += open.size();
 					System.out.println(currentNode.getSolution());
-					System.out.println("Expanded nodes: " + explosionCounter);
+					System.out.println("Height of the solution: " + currentNode.getHeight());
+					System.out.println("Generated nodes: " + (openSize + closed.size()));
+					System.out.println("Frontier nodes: " + openSize);
+					System.out.println("Expanded nodes: " + (closed.size() - 1));
+					System.out.println("Time elapsed: " + (System.currentTimeMillis() - time0));
 				} else {
-					explosionCounter++;
-					explode(currentNode);
+					if (myStrategy != SearchStrategy.ID || iterativeDepth > currentNode.getHeight()) {
+						explode(currentNode);
+					}
 				}
 			}
 		}
-
 		if (finished) {
 			System.out.println("OK! solution found!");
 		} else if (failed) {
@@ -65,7 +81,7 @@ public abstract class GPSEngine {
 			System.err.println("No rules!");
 			return false;
 		}
-		
+
 		for (GPSRule rule : problem.getRules()) {
 			GPSState newState = null;
 			try {
@@ -110,13 +126,12 @@ public abstract class GPSEngine {
 	}
 
 	public abstract  void addNode(GPSNode node);
-	
+
 	public LinkedList<GPSNode> getOpened(){
 		return this.open;
 	}
-	
+
 	public SearchStrategy getStrategy(){
 		return this.strategy;
 	}
-	
 }

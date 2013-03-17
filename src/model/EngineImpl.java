@@ -18,6 +18,10 @@ public class EngineImpl extends GPSEngine{
 				open.offer(node);
 				break;
 			case AStar:
+				// TODO A*
+				break;
+			case ID:
+				open.push(node);
 				break;
 		}
 	}
