@@ -104,7 +104,7 @@ public class Board implements GPSState, Cloneable {
 			}
 			s.append("\n");
 		}
-		s.append(String.format("Points: %d\nMovements left: %d", points, movements));
+		s.append(String.format("\nPoints: %d\nMovements left: %d", points, movements));
 		return s.toString();
 	}
 
