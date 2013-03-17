@@ -30,7 +30,7 @@ public abstract class GPSEngine {
 		int iterativeDepth = 1;
 		int openSize = 0;
 
-		GPSNode rootNode = new GPSNode(problem.getInitState(), 0);
+		GPSNode rootNode = new GPSNode(problem.getInitState(), null, 0);
 		boolean finished = false;
 		boolean failed = false;
 
@@ -93,7 +93,7 @@ public abstract class GPSEngine {
 					&& !checkBranch(node, newState)
 					&& !checkOpenAndClosed(node.getCost() + rule.getCost(),
 							newState)) {
-				GPSNode newNode = new GPSNode(newState, node.getCost()
+				GPSNode newNode = new GPSNode(newState, rule, node.getCost()
 						+ rule.getCost());
 				newNode.setParent(node);
 				addNode(newNode);

@@ -9,33 +9,44 @@ import java.util.Random;
 import java.util.Set;
 
 public class Board implements GPSState, Cloneable {
-
-	private static final int VISIBLE_ROWS = 10;
-	private static final int TOTAL_ROWS = 30;
+	private static final int VISIBLE_ROWS = 5;
 	private static final int INITIAL_ROW = 20;
-	private static final int COLS = 8;
+	private static final int TOTAL_ROWS = INITIAL_ROW + VISIBLE_ROWS;
+	private static final int COLS = 5;
 	private static final int MAX_COLORS = 8;
 	private static final int EMPTY = 0;
-	private static final int GOAL_POINTS = 10;
+	private static final int GOAL_POINTS = 1;
 	public static final int MAX_MOVEMENTS = 3;
 
-	private int initialRow;
+	private int initialRow = INITIAL_ROW;
 	private int[][] tiles;
-	private int movements;
-	private int points;
+	private int movements = MAX_MOVEMENTS;
+	private int points = 0;
 
-	private Board(int[][] tiles, int movements, int points) {
-		this.initialRow = INITIAL_ROW;
-		this.tiles = tiles;
+	private Board(int tiles[][], int movements, int points, int initialRow) {
+		this.initialRow = initialRow;
 		this.movements = movements;
 		this.points = points;
+		this.tiles = tiles;
+	}
+	
+	public Board(){
+		this.tiles = new int[TOTAL_ROWS][COLS];
+		generate();
 	}
 
-	public Board() {
-		tiles = new int[TOTAL_ROWS][COLS];
-		generateRows(TOTAL_ROWS);
+	private void generate(){
+		for(int row = 0; row<TOTAL_ROWS; row++){
+			for(int col = 0; col<COLS; col++){
+				Random rand = new Random();
+				tiles[row][col] = rand.nextInt(MAX_COLORS) + 1;
+				while(adjacentTiles(row, col).size()>=3){
+					tiles[row][col] = rand.nextInt(MAX_COLORS) + 1;
+				}
+			}
+		}
 	}
-
+	
 	@Override
 	public boolean compare(GPSState state) {
 		if (!(state instanceof Board)) {
@@ -68,7 +79,7 @@ public class Board implements GPSState, Cloneable {
 				clonedTiles[i][j] = this.tiles[i][j];
 			}
 		}
-		return new Board(clonedTiles, movements, points);
+		return new Board(clonedTiles, movements, points, initialRow);
 	}
 
 	public void shift(int row, int amount) throws NotAppliableException {
@@ -86,15 +97,15 @@ public class Board implements GPSState, Cloneable {
 
 	@Override
 	public String toString() {
-		String s = "";
+		StringBuffer s = new StringBuffer();
 		for (int row = initialRow; row < initialRow + VISIBLE_ROWS; row++) {
 			for (int col = 0; col < COLS; col++) {
-				s += tiles[row][col] + ", ";
+				s.append(tiles[row][col] + ", ");
 			}
-			s += "\n";
+			s.append("\n");
 		}
-		s += "------------\n";
-		return s;
+		s.append(String.format("Points: %d\nMovements left: %d", points, movements));
+		return s.toString();
 	}
 
 	private void check() {
@@ -119,7 +130,7 @@ public class Board implements GPSState, Cloneable {
 		}
 	}
 
-	private Set<Point> adjacentTiles(int row, int col) {
+	Set<Point> adjacentTiles(int row, int col) {
 		Set<Point> colored = new HashSet<Point>();
 		fillColored(colored, tiles[row][col], row, col);
 		return colored;
@@ -208,12 +219,12 @@ public class Board implements GPSState, Cloneable {
 		return row >= initialRow && col >= 0 && row < initialRow + VISIBLE_ROWS && col < COLS;
 	}
 
-	public static void main(String[] args) throws NotAppliableException {
-		Board board = generateTestBoard();
+	public static void main(String[] args) {
+		Board board = new Board();
 		System.out.println(board);
-		board.shift(0, 2);
-		board.shift(1, 1);
-		System.out.println(board);
+//		board.shift(0, 2);
+//		board.shift(1, 1);
+//		System.out.println(board);
 	}
 	
 	public static Board generateTestBoard(){
@@ -248,7 +259,13 @@ public class Board implements GPSState, Cloneable {
 				{6,7,8,1,2,3,4,5},
 				{7,8,1,2,3,4,5,6},
 				{8,1,2,3,4,5,6,7}};
-		Board board = new Board(tiles, MAX_MOVEMENTS, 0);
+		int[][] realTiles = new int[TOTAL_ROWS][COLS];
+		for (int i =0; i<TOTAL_ROWS; i++) {
+			for (int j =0; j<COLS; j++) {
+				realTiles[i][j] = tiles[i][j];
+			}
+		}
+		Board board = new Board(realTiles, MAX_MOVEMENTS, 0, INITIAL_ROW);
 		return board;
 	}
 	

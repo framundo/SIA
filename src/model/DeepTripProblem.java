@@ -12,6 +12,7 @@ public class DeepTripProblem implements GPSProblem{
 	
 	@Override
 	public GPSState getInitState() {
+//		return new Board();
 		return Board.generateTestBoard();
 	}
 
