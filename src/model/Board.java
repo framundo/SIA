@@ -8,12 +8,11 @@ import java.util.Random;
 import java.util.Set;
 
 public class Board implements GPSState, Cloneable {
-
+	private static final int MAX_MOVEMENTS = 2;
 	private static final int VISIBLE_ROWS = 10;
 	private static final int TOTAL_ROWS = 30;
-	private static final int INITIAL_ROW = 20;
+	private static final int INITIAL_ROW = 25;
 	private static final int COLS = 8;
-	private static final int MAX_MOVEMENTS = 2;
 	private static final int MAX_COLORS = 8;
 	private static final int EMPTY = 0;
 
@@ -22,11 +21,19 @@ public class Board implements GPSState, Cloneable {
 	private int movements;
 	private int points;
 
-	private Board(int[][] tiles, int movements, int points) {
+	private Board(int tiles[][], int movements, int points) {
 		this.initialRow = INITIAL_ROW;
-		this.tiles = tiles;
 		this.movements = movements;
 		this.points = points;
+		this.tiles = tiles;
+	}
+	
+	private Board(int movements, int points){
+		this.initialRow = INITIAL_ROW;
+		this.movements = movements;
+		this.points = points;
+		this.tiles = new int[TOTAL_ROWS][COLS];
+		generate();
 	}
 
 	public Board() {
@@ -34,6 +41,18 @@ public class Board implements GPSState, Cloneable {
 		generateRows(TOTAL_ROWS);
 	}
 
+	private void generate(){
+		for(int row = 0; row<TOTAL_ROWS; row++){
+			for(int col = 0; col<COLS; col++){
+				Random rand = new Random();
+				tiles[row][col] = rand.nextInt(MAX_COLORS) + 1;
+				while(adjacentTiles(row, col).size()>=3){
+					tiles[row][col] = rand.nextInt(MAX_COLORS) + 1;
+				}
+			}
+		}
+	}
+	
 	@Override
 	public boolean compare(GPSState state) {
 		if (!(state instanceof Board)) {
@@ -114,7 +133,7 @@ public class Board implements GPSState, Cloneable {
 		}
 	}
 
-	private Set<Point> adjacentTiles(int row, int col) {
+	Set<Point> adjacentTiles(int row, int col) {
 		Set<Point> colored = new HashSet<Point>();
 		fillColored(colored, tiles[row][col], row, col);
 		return colored;
@@ -203,48 +222,48 @@ public class Board implements GPSState, Cloneable {
 	}
 
 	public static void main(String[] args) {
-		Board board = generateTestBoard();
+		Board board = new Board(MAX_MOVEMENTS, 0);
 		System.out.println(board);
-		board.shift(0, 2);
-		board.shift(1, 1);
-		System.out.println(board);
+//		board.shift(0, 2);
+//		board.shift(1, 1);
+//		System.out.println(board);
 	}
 	
-	public static Board generateTestBoard(){
-		int[][] tiles = {
-				{1,2,3,4,5,6,7,8},
-				{2,3,4,5,6,7,8,1},
-				{3,4,5,6,7,8,1,2},
-				{4,5,6,7,8,1,2,3},
-				{5,6,7,8,1,2,3,4},
-				{6,7,8,1,2,3,4,5},
-				{7,8,1,2,3,4,5,6},
-				{8,1,2,3,4,5,6,7},
-				{1,2,3,4,5,6,7,8},
-				{2,3,4,5,6,7,8,1},
-				{3,4,5,6,7,8,1,2},
-				{4,5,6,7,8,1,2,3},
-				{5,6,7,8,1,2,3,4},
-				{6,7,8,1,2,3,4,5},
-				{7,8,1,2,3,4,5,6},
-				{8,1,2,3,4,5,6,7},
-				{1,2,3,4,5,6,7,8},
-				{2,3,4,5,6,7,8,1},
-				{3,4,5,6,7,8,1,2},
-				{4,5,6,7,8,1,2,3},
-				{5,6,7,8,1,2,3,4},
-				{6,7,8,1,2,3,4,5},
-				{7,8,1,2,3,4,5,6},
-				{8,1,2,3,4,5,6,7},
-				{3,4,5,6,7,8,1,2},
-				{4,5,6,7,8,1,2,3},
-				{5,6,7,8,1,2,3,4},
-				{6,7,8,1,2,3,4,5},
-				{7,8,1,2,3,4,5,6},
-				{8,1,2,3,4,5,6,7}};
-		Board board = new Board(tiles, MAX_MOVEMENTS, 0);
-		return board;
-	}
+//	public static Board generateTestBoard(){
+//		int[][] tiles = {
+//				{1,2,3,4,5,6,7,8},
+//				{2,3,4,5,6,7,8,1},
+//				{3,4,5,6,7,8,1,2},
+//				{4,5,6,7,8,1,2,3},
+//				{5,6,7,8,1,2,3,4},
+//				{6,7,8,1,2,3,4,5},
+//				{7,8,1,2,3,4,5,6},
+//				{8,1,2,3,4,5,6,7},
+//				{1,2,3,4,5,6,7,8},
+//				{2,3,4,5,6,7,8,1},
+//				{3,4,5,6,7,8,1,2},
+//				{4,5,6,7,8,1,2,3},
+//				{5,6,7,8,1,2,3,4},
+//				{6,7,8,1,2,3,4,5},
+//				{7,8,1,2,3,4,5,6},
+//				{8,1,2,3,4,5,6,7},
+//				{1,2,3,4,5,6,7,8},
+//				{2,3,4,5,6,7,8,1},
+//				{3,4,5,6,7,8,1,2},
+//				{4,5,6,7,8,1,2,3},
+//				{5,6,7,8,1,2,3,4},
+//				{6,7,8,1,2,3,4,5},
+//				{7,8,1,2,3,4,5,6},
+//				{8,1,2,3,4,5,6,7},
+//				{3,4,5,6,7,8,1,2},
+//				{4,5,6,7,8,1,2,3},
+//				{5,6,7,8,1,2,3,4},
+//				{6,7,8,1,2,3,4,5},
+//				{7,8,1,2,3,4,5,6},
+//				{8,1,2,3,4,5,6,7}};
+//		Board board = new Board(tiles, MAX_MOVEMENTS, 0);
+//		return board;
+//	}
 	
 	public static int getRows(){
 		return VISIBLE_ROWS;
