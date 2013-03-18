@@ -37,7 +37,7 @@ public abstract class GPSEngine {
 		open.add(rootNode);
 		while (!failed && !finished) {
 			if (open.isEmpty()) {
-				if (myStrategy == SearchStrategy.ID && iterativeDepth < Board.MAX_MOVEMENTS) { // Tengo que aumentar el nivel si o si
+				if (myStrategy == SearchStrategy.ID && iterativeDepth < Board.getMaxMovements()) { // Tengo que aumentar el nivel si o si
 					iterativeDepth++;
 					openSize += open.size();
 					open = new LinkedList<GPSNode>();
