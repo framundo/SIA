@@ -4,59 +4,66 @@ import gps.api.GPSState;
 import gps.exception.NotAppliableException;
 
 import java.awt.Point;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
 public class Board implements GPSState, Cloneable {
-	private static final int EMPTY = 0;
+	static final int EMPTY = 0;
 
-	private static int ROWS = 10;
-	private static int COLS = 8;
-	private static int MAX_COLORS = 8;
-	private static int GOAL_POINTS = 10;
-	private static int MAX_MOVEMENTS = 10;
+	private static int ROWS = 4;
+	private static int COLS = 4;
+	private static int MAX_COLORS = 4;
 
 	private int[][] tiles;
-	private int movements = MAX_MOVEMENTS;
-	private int points = 0;
+	private int[] colorQty = new int[MAX_COLORS]; 
 
-	private Board(int tiles[][], int movements, int points) {
-		this.movements = movements;
-		this.points = points;
+	private Board(int tiles[][], int[] colorQty) {
 		this.tiles = tiles;
+		this.colorQty = colorQty;
 	}
 	
 	public Board(){
 		this.tiles = new int[ROWS][COLS];
 		generate(ROWS);
 	}
+	
+	public static int getRows(){
+		return ROWS;
+	}
+	
+	public static int getCols(){
+		return COLS;
+	}
+	
+	public static void setRows(int rows) {
+		if(rows <= 0) {
+			throw new IllegalArgumentException("Invalid rows value: " + rows);
+		}
+		ROWS = rows;
+	}
 
-	private void generate(int maxRows){
-		for(int row = 0; row<maxRows; row++){
-			for(int col = 0; col<COLS; col++){
-				generateTile(row, col);
-			}
+	public static void setColumns(int cols) {
+		if(cols <= 0) {
+			throw new IllegalArgumentException("Invalid cols value: " + cols);
 		}
+		COLS = cols;
 	}
-	
-	private void generateTile(int row, int col) {
-		Random rand = new Random();
-		tiles[row][col] = rand.nextInt(MAX_COLORS) + 1;
-		while(adjacentTiles(row, col).size()>=3){
-			tiles[row][col] = rand.nextInt(MAX_COLORS) + 1;
+
+	public static void setMaxColors(int colors) {
+		if(colors <= 0) {
+			throw new IllegalArgumentException("Invalid colors value: " + colors);
 		}
+		MAX_COLORS = colors;
 	}
-	
+
 	@Override
 	public boolean compare(GPSState state) {
 		if (!(state instanceof Board)) {
 			return false;
 		}
 		Board other = (Board) state;
-		if (other.movements != movements || other.points != points) {
-			return false;
-		}
 		for (int i = 0; i < ROWS; i++) {
 			for (int j = 0; j < COLS; j++) {
 				if (other.tiles[i][j] != tiles[i][j]) {
@@ -69,7 +76,7 @@ public class Board implements GPSState, Cloneable {
 
 	@Override
 	public boolean isGoal() {
-		return this.points >= GOAL_POINTS;
+		return rowIsEmpty(0);
 	}
 
 	@Override
@@ -80,20 +87,7 @@ public class Board implements GPSState, Cloneable {
 				clonedTiles[i][j] = this.tiles[i][j];
 			}
 		}
-		return new Board(clonedTiles, movements, points);
-	}
-
-	public void shift(int row, int amount) throws NotAppliableException {
-		if (movements <= 0) {
-			throw new NotAppliableException();
-		}
-		this.movements--;
-		int[] shifted = new int[COLS];
-		for (int i = 0; i < COLS; i++) {
-			shifted[i] = tiles[row][(i + amount) % COLS];
-		}
-		tiles[row] = shifted;
-		check();
+		return new Board(clonedTiles, Arrays.copyOf(colorQty, MAX_COLORS));
 	}
 
 	@Override
@@ -105,12 +99,47 @@ public class Board implements GPSState, Cloneable {
 			}
 			s.append("\n");
 		}
-		s.append(String.format("\nPoints: %d\nMovements left: %d", points, movements));
 		return s.toString();
 	}
+	
+	public int shift(int row, int amount) throws NotAppliableException {
+		if (rowIsEmpty(row) || isDeadEnd()) {
+			throw new NotAppliableException();
+		}
+		int[] shifted = new int[COLS];
+		for (int i = 0; i < COLS; i++) {
+			shifted[i] = tiles[row][(i + amount) % COLS];
+		}
+		tiles[row] = shifted;
+		return check();
+	}
 
-	private void check() {
+	boolean isDeadEnd() {
+		for(int i = 0; i<MAX_COLORS; i++) {
+			if (colorQty[i] == 1 || colorQty[i] == 2) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private void calculateColorQty() {
+		for (int i = 0; i < ROWS; i++) {
+			for (int j = 0; j < COLS; j++) {
+				int color = tiles[i][j];
+				if (color != EMPTY) {
+					colorQty[color-1]++;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Checks if there's any popping to be done after a shift.
+	 */
+	private int check() {
 		boolean popped = true;
+		int poppedQty = 0;
 		while (popped) {
 			popped = false;
 			for (int row = 0; row < ROWS; row++) {
@@ -119,18 +148,20 @@ public class Board implements GPSState, Cloneable {
 						Set<Point> colored = adjacentTiles(row, col);
 						if (colored.size() >= 3) {
 							pop(colored);
+							poppedQty += colored.size();
 							popped = true;
 						}
 					}
 				}
 			}
-			if (popped) {
-				lift();
-				fill();
-			}
+			lift();
 		}
+		return poppedQty;
 	}
 
+	/**
+	 * Fills a set of points of adjacent tiles of the same color.
+	 */
 	Set<Point> adjacentTiles(int row, int col) {
 		Set<Point> colored = new HashSet<Point>();
 		fillColored(colored, tiles[row][col], row, col);
@@ -148,13 +179,33 @@ public class Board implements GPSState, Cloneable {
 		}
 	}
 
+	private void generate(int maxRows){
+		for(int row = 0; row<maxRows; row++){
+			for(int col = 0; col<COLS; col++){
+				generateTile(row, col);
+			}
+		}
+	}
+	
+	private void generateTile(int row, int col) {
+		Random rand = new Random();
+		tiles[row][col] = rand.nextInt(MAX_COLORS) + 1;
+		while(adjacentTiles(row, col).size()>=3){
+			tiles[row][col] = rand.nextInt(MAX_COLORS) + 1;
+			colorQty[tiles[row][col]-1]++;
+		}
+	}
+	
 	private void pop(Set<Point> colored) {
 		for (Point point : colored) {
+			colorQty[tiles[point.x][point.y]]--;
 			tiles[point.x][point.y] = EMPTY;
 		}
-		points += Math.pow(2, colored.size()-2)-1;
 	}
 
+	/**
+	 * Makes the tiles float to the top if there's an empty space above them.
+	 */
 	private void lift() {
 		for (int col = 0; col < COLS; col++) {
 			int row = 0;
@@ -179,58 +230,20 @@ public class Board implements GPSState, Cloneable {
 		}
 	}
 
-	private void fill() {
-		boolean found = false;
-		int count = 0;
-		for (int row = ROWS - 1; row >= 0 && !found; row--) {
-			for (int col = 0; col < COLS && !found; col++) {
-				found = found || tiles[row][col] != EMPTY;
-			}
-			if (!found) {
-				count++;
-			}
-		}
-		if (count != 0) {
-			dropDown(count);
-			generate(count);
-		}
-	}
-
-	private void dropDown(int amount) {
-		for (int row = ROWS - 1; row >= amount; row--) {
-			for (int col = 0; col < COLS; col++) {
-				tiles[row][col] = tiles[row - amount][col];
-			}
-		}
-	}
-	
-//	private void dropDown(int amount){
-//		this.initialRow -= amount;
-//	}
-
-	private void generateRows(int amount) {
-		for (int row = 0; row < amount; row++) {
-			for (int col = 0; col < COLS; col++) {
-				Random rand = new Random();
-				tiles[row][col] = rand.nextInt(MAX_COLORS) + 1;
-			}
-		}
-	}
-
 	private boolean isValidPoint(int row, int col) {
 		return row >= 0 && col >= 0 && row < ROWS && col < COLS;
 	}
 
-	public static void main(String[] args) throws NotAppliableException {
-		Board board = generateTestBoard();
-		System.out.println(board);
-		board.shift(1, 4);
-		board.shift(2, 3);
-		board.tiles[4][0] = 0;
-		board.tiles[4][1] = 0;
-		board.fill();
-		System.out.println(board);
-	}
+//	public static void main(String[] args) throws NotAppliableException {
+////		Board board = generateTestBoard();
+//		System.out.println(board);
+//		board.shift(1, 4);
+//		board.shift(2, 3);
+//		board.tiles[4][0] = 0;
+//		board.tiles[4][1] = 0;
+////		board.fill();
+//		System.out.println(board);
+//	}
 	
 	public static Board generateTestBoard(){
 		int[][] tiles = {
@@ -270,54 +283,23 @@ public class Board implements GPSState, Cloneable {
 				realTiles[i][j] = tiles[i][j];
 			}
 		}
-		Board board = new Board(realTiles, MAX_MOVEMENTS, 0);
+		Board board;// = new Board(realTiles);//, MAX_MOVEMENTS, 0);
+		int[][] depth7board = {{2, 3, 2, 3}, {4, 2, 1, 4}, {2, 3, 1, 3}, {4, 3, 4, 1}};
+		int[] colors = {3, 4, 5, 4};
+		board = new Board(depth7board, colors);
 		return board;
 	}
 	
-	public static int getRows(){
-		return ROWS;
-	}
-	
-	public static int getCols(){
-		return COLS;
-	}
-	
-	public static void setRows(int rows) {
-		if(rows <= 0) {
-			throw new IllegalArgumentException("Invalid rows value: " + rows);
+	private boolean rowIsEmpty(int row) {
+		for (int col = 0; col<COLS; col++) {
+			if(tiles[row][col] != EMPTY) {
+				return false;
+			}
 		}
-		ROWS = rows;
+		return true;
 	}
 
-	public static void setColumns(int cols) {
-		if(cols <= 0) {
-			throw new IllegalArgumentException("Invalid cols value: " + cols);
-		}
-		COLS = cols;
-	}
-
-	public static void setMaxColors(int colors) {
-		if(colors <= 0) {
-			throw new IllegalArgumentException("Invalid colors value: " + colors);
-		}
-		MAX_COLORS = colors;
-	}
-
-	public static void setGoalPoints(int points) {
-		if(points <= 0) {
-			throw new IllegalArgumentException("Invalid points value: " + points);
-		}
-		GOAL_POINTS = points;
-	}
-
-	public static void setMaxMovements(int movements) {
-		if(movements <= 0) {
-			throw new IllegalArgumentException("Invalid movements value: " + movements);
-		}
-		MAX_MOVEMENTS = movements;
-	}
-
-	public static int getMaxMovements() {
-		return MAX_MOVEMENTS;
+	int getTile(int i, int j) {
+		return tiles[i][j];
 	}
 }
