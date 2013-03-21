@@ -15,9 +15,7 @@ public class ProblemSolver {
 	private static final String HEURISTICS_COMMAND = "heuristics=";
 	private static final String ROWS_COMMAND = "rows=";
 	private static final String COLS_COMMAND = "cols=";
-	private static final String GOAL_POINTS_COMMAND = "points=";
 	private static final String COLORS_COMMAND = "colors=";
-	private static final String MOVEMENTS_COMMAND = "movs=";
 
 	public static void main(String[] args) {
 //		if (args.length != 2 && args.length != 5) { // strategia y heurist
@@ -36,10 +34,7 @@ public class ProblemSolver {
 	}
 	
 	private static SearchStrategy parseStrategy(String strategyCommand) {
-		if (!strategyCommand.startsWith(STRATEGY_COMMAND)) {
-			throw new IllegalArgumentException("Invalid argument strategy");
-		}
-		strategyCommand = strategyCommand.substring(STRATEGY_COMMAND.length());
+		strategyCommand = parseCommand(strategyCommand, STRATEGY_COMMAND);
 		try {
 			return SearchStrategy.valueOf(strategyCommand);
 		} catch(Exception e) {
@@ -47,17 +42,22 @@ public class ProblemSolver {
 		}
 	}
 	
+	private static Heuristic parseHeuristic(String heuristicCommand) {
+		heuristicCommand = parseCommand(heuristicCommand, HEURISTICS_COMMAND);
+		try {
+			return Heuristic.valueOf(heuristicCommand);
+		} catch(Exception e) {
+			throw new IllegalArgumentException("Unable to find the given heuristic");
+		}
+	}
+	
 	private static void parseAndSetBoardValues(String[] args) {
 		String rows = parseCommand(args[3], ROWS_COMMAND);		
 		String cols = parseCommand(args[4], COLS_COMMAND);
-//		String goalPoints = parseCommand(args[5], GOAL_POINTS_COMMAND);
-//		String movements = parseCommand(args[6], MOVEMENTS_COMMAND);
 		String colors = parseCommand(args[5], COLORS_COMMAND);
 		try {
 			Board.setRows(Integer.valueOf(rows));
 			Board.setColumns(Integer.valueOf(cols));
-//			Board.setGoalPoints(Integer.valueOf(goalPoints));
-//			Board.setMaxMovements(Integer.valueOf(movements));
 			Board.setMaxColors(Integer.valueOf(colors));
 		} catch(NumberFormatException e) {
 			throw new IllegalArgumentException("Error parsing board arguments");

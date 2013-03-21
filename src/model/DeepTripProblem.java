@@ -9,7 +9,7 @@ import java.util.List;
 
 public class DeepTripProblem implements GPSProblem{
 
-	public enum Heuristic {TILES};
+	public enum Heuristic {TILES, COLORS, STEPS};
 
 	private static Heuristic HEURISTIC;
 
@@ -46,34 +46,22 @@ public class DeepTripProblem implements GPSProblem{
 			return Integer.MAX_VALUE;
 		}
 		switch(HEURISTIC){
+		case STEPS:
+			return stepsHValue(board);
+		case COLORS:
+			return (board.getTileQty() * 6 + board.getLeftColorsQty() * (Board.getCols() * Board.getRows())) / 10;
 		case TILES:
-			return tilesHValue(board);
+			return board.getTileQty();
 		default:
 			return null;
 		}
 	}
-	
 
-//	private Double stepsHValue(Board board) {
-//		return tilesHValue(board)/(Board.getRows()*Board.getCols());
-//	}
-
-	private Integer tilesHValue(Board board) {
-		int qty = 0;
-		int rows = Board.getRows();
-		int cols = Board.getCols();
-		for(int i = 0; i<rows; i++) {
-			boolean empty = true;
-			for(int j = 0; j < cols; j++) {
-				if (board.getTile(i, j) != Board.EMPTY) {
-					qty++;
-					empty = false;
-				}
-			}
-			if(empty) {
-				return qty;
-			}
+	private Integer stepsHValue(Board board) {
+		int hVal = 0;
+		for(int color = 0; color<board.getMaxColors(); color++) {
+			hVal += board.getColorQty(color + 1) / 3;
 		}
-		return qty;
+		return hVal;
 	}
 }

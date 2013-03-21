@@ -57,7 +57,7 @@ public abstract class GPSEngine {
 				}
 			} else {
 				GPSNode currentNode = frontier.getNext(); 
-				System.out.println("Probando nodo altura " + currentNode.getHeight() + " f vale " + (currentNode.getCost()+currentNode.getHValue()));
+				System.out.println("Probando nodo altura " + currentNode.getHeight() + " h vale " + (currentNode.getHValue()));
 				nodeMaxHeight = Math.max(nodeMaxHeight, currentNode.getHeight());
 				explored.add(currentNode);
 				if (isGoal(currentNode)) {
@@ -104,8 +104,7 @@ public abstract class GPSEngine {
 					&& !checkBranch(node, newState)
 					&& !checkOpenAndClosed(node.getCost() + rule.getCost(),
 							newState)) {
-				GPSNode newNode = new GPSNode(newState, node, rule, node.getCost()
-						+ rule.getCost(), problem.getHValue(newState));
+				GPSNode newNode = new GPSNode(newState, node, rule, node.getCost() + rule.getCost(), problem.getHValue(newState));
 				addNode(newNode);
 			}
 		}

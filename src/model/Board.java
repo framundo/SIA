@@ -114,6 +114,29 @@ public class Board implements GPSState, Cloneable {
 		return check();
 	}
 
+
+	public int getTileQty() {
+		int qty = 0;
+		for(int i = 0; i<MAX_COLORS; i++) {
+			qty+=colorQty[i];
+		}
+		return qty;
+	}
+
+	public int getLeftColorsQty() {
+		int qty = 0;
+		for(int i = 0; i<MAX_COLORS; i++) {
+			if(colorQty[i] != 0) {
+				qty++;
+			}
+		}
+		return qty;
+	}
+	
+	public int getColorQty(int color) {
+		return colorQty[color-1];
+	}
+	
 	boolean isDeadEnd() {
 		for(int i = 0; i<MAX_COLORS; i++) {
 			if (colorQty[i] == 1 || colorQty[i] == 2) {
@@ -192,13 +215,13 @@ public class Board implements GPSState, Cloneable {
 		tiles[row][col] = rand.nextInt(MAX_COLORS) + 1;
 		while(adjacentTiles(row, col).size()>=3){
 			tiles[row][col] = rand.nextInt(MAX_COLORS) + 1;
-			colorQty[tiles[row][col]-1]++;
 		}
+		colorQty[tiles[row][col]-1]++;
 	}
 	
 	private void pop(Set<Point> colored) {
 		for (Point point : colored) {
-			colorQty[tiles[point.x][point.y]]--;
+			colorQty[tiles[point.x][point.y]-1]--;
 			tiles[point.x][point.y] = EMPTY;
 		}
 	}
@@ -234,17 +257,6 @@ public class Board implements GPSState, Cloneable {
 		return row >= 0 && col >= 0 && row < ROWS && col < COLS;
 	}
 
-//	public static void main(String[] args) throws NotAppliableException {
-////		Board board = generateTestBoard();
-//		System.out.println(board);
-//		board.shift(1, 4);
-//		board.shift(2, 3);
-//		board.tiles[4][0] = 0;
-//		board.tiles[4][1] = 0;
-////		board.fill();
-//		System.out.println(board);
-//	}
-	
 	public static Board generateTestBoard(){
 		int[][] tiles = {
 				{1,2,3,4,5,6,7,8},
@@ -299,7 +311,7 @@ public class Board implements GPSState, Cloneable {
 		return true;
 	}
 
-	int getTile(int i, int j) {
-		return tiles[i][j];
+	public int getMaxColors() {
+		return MAX_COLORS;
 	}
 }
