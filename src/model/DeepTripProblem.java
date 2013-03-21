@@ -11,16 +11,23 @@ public class DeepTripProblem implements GPSProblem{
 
 	public enum Heuristic {TILES, COLORS, STEPS};
 
-	private static Heuristic HEURISTIC;
+	private Heuristic heuristic;
 
-	public static void setHeuristic(Heuristic h) {
-		HEURISTIC = h;
+	private Board board;
+	
+	public void setHeuristic(Heuristic heuristic) {
+		this.heuristic = heuristic;
 	}
 
+	
+	public DeepTripProblem(Board board, Heuristic heuristic) {
+		this.board = board;
+		this.heuristic = heuristic;
+	}
+	
 	@Override
 	public GPSState getInitState() {
-//				return new Board();
-		return Board.generateTestBoard();
+		return this.board;
 	}
 
 	@Override
@@ -30,9 +37,9 @@ public class DeepTripProblem implements GPSProblem{
 
 	@Override
 	public List<GPSRule> getRules() {
-		List<GPSRule> rules = new ArrayList<GPSRule>(Board.getRows()*(Board.getCols()-1));
-		for(int i = 0; i < Board.getRows(); i++){
-			for(int j = 1; j < Board.getCols(); j++){
+		List<GPSRule> rules = new ArrayList<GPSRule>(board.getRows()*(board.getCols()-1));
+		for(int i = 0; i < board.getRows(); i++){
+			for(int j = 1; j < board.getCols(); j++){
 				rules.add(new ShiftRule(i,j));
 			}
 		}
@@ -45,11 +52,11 @@ public class DeepTripProblem implements GPSProblem{
 		if (board.isDeadEnd()) {
 			return Integer.MAX_VALUE;
 		}
-		switch(HEURISTIC){
+		switch(heuristic){
 		case STEPS:
 			return stepsHValue(board);
 		case COLORS:
-			return (board.getTileQty() * 6 + board.getLeftColorsQty() * (Board.getCols() * Board.getRows())) / 10;
+			return (board.getTileQty() * 6 + board.getLeftColorsQty() * (board.getCols() * board.getRows())) / 10;
 		case TILES:
 			return board.getTileQty();
 		default:

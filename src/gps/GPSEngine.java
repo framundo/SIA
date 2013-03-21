@@ -8,10 +8,7 @@ import gps.api.NaiveFrontier;
 import gps.exception.NotAppliableException;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
 
 import model.ComparatorProvider;
 
@@ -24,8 +21,8 @@ public abstract class GPSEngine {
 	// Use this variable in the addNode implementation
 	private SearchStrategy strategy;
 
-	public void engine(GPSProblem myProblem, SearchStrategy myStrategy) {
-		System.out.println("Arrancamos");
+	public boolean engine(GPSProblem myProblem, SearchStrategy myStrategy) {
+		//System.out.println("Arrancamos");
 		if (myStrategy == SearchStrategy.AStar || myStrategy == SearchStrategy.GREEDY) {
 			frontier = new InformedFrontier(ComparatorProvider.get(myStrategy));
 		} else {
@@ -57,7 +54,6 @@ public abstract class GPSEngine {
 				}
 			} else {
 				GPSNode currentNode = frontier.getNext(); 
-				System.out.println("Probando nodo altura " + currentNode.getHeight() + " h vale " + (currentNode.getHValue()));
 				nodeMaxHeight = Math.max(nodeMaxHeight, currentNode.getHeight());
 				explored.add(currentNode);
 				if (isGoal(currentNode)) {
@@ -77,10 +73,13 @@ public abstract class GPSEngine {
 			}
 		}
 		if (finished) {
-			System.out.println("OK! solution found!");
+			//System.out.println("OK! solution found!");
+			return true;
 		} else if (failed) {
-			System.err.println("FAILED! solution not found!");
+			//System.out.println("FAILED! solution not found!");
+			return false;
 		}
+		return false;
 	}
 
 	private  boolean isGoal(GPSNode currentNode) {

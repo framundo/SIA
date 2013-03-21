@@ -1,13 +1,11 @@
 package solver;
 
-import java.awt.datatransfer.StringSelection;
-
 import gps.SearchStrategy;
 import gps.api.GPSProblem;
 import model.Board;
 import model.DeepTripProblem;
-import model.EngineImpl;
 import model.DeepTripProblem.Heuristic;
+import model.EngineImpl;
 
 public class ProblemSolver {
 
@@ -28,8 +26,7 @@ public class ProblemSolver {
 //		}
 //		GPSProblem problem = new DeepTripProblem();
 //		(new EngineImpl()).engine(problem, strategy);
-		GPSProblem problem = new DeepTripProblem();
-		DeepTripProblem.setHeuristic(Heuristic.TILES);
+		GPSProblem problem = new DeepTripProblem(Board.generateTestBoard(), Heuristic.TILES);
 		(new EngineImpl()).engine(problem, SearchStrategy.AStar);
 	}
 	
@@ -51,14 +48,13 @@ public class ProblemSolver {
 		}
 	}
 	
-	private static void parseAndSetBoardValues(String[] args) {
+	private Board parseAndSetBoardValues(String[] args) {
 		String rows = parseCommand(args[3], ROWS_COMMAND);		
 		String cols = parseCommand(args[4], COLS_COMMAND);
 		String colors = parseCommand(args[5], COLORS_COMMAND);
 		try {
-			Board.setRows(Integer.valueOf(rows));
-			Board.setColumns(Integer.valueOf(cols));
-			Board.setMaxColors(Integer.valueOf(colors));
+			Board board = new Board(Integer.valueOf(rows),Integer.valueOf(cols),Integer.valueOf(colors));
+			return board;
 		} catch(NumberFormatException e) {
 			throw new IllegalArgumentException("Error parsing board arguments");
 		}
