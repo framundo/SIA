@@ -30,9 +30,9 @@ public class ProblemSolver {
 //		}
 //		GPSProblem problem = new DeepTripProblem();
 //		(new EngineImpl()).engine(problem, strategy);
-		GPSProblem problem = new DeepTripProblem();
-		DeepTripProblem.setHeuristic(Heuristic.TILES);
-		(new EngineImpl()).engine(problem, SearchStrategy.AStar);
+//		GPSProblem problem = new DeepTripProblem();
+//		DeepTripProblem.setHeuristic(Heuristic.TILES);
+//		(new EngineImpl()).engine(problem, SearchStrategy.AStar);
 	}
 	
 	private static SearchStrategy parseStrategy(String strategyCommand) {
@@ -47,21 +47,12 @@ public class ProblemSolver {
 		}
 	}
 	
-	private static void parseAndSetBoardValues(String[] args) {
+	private Board parseAndSetBoardValues(String[] args) {
 		String rows = parseCommand(args[3], ROWS_COMMAND);		
 		String cols = parseCommand(args[4], COLS_COMMAND);
-//		String goalPoints = parseCommand(args[5], GOAL_POINTS_COMMAND);
-//		String movements = parseCommand(args[6], MOVEMENTS_COMMAND);
 		String colors = parseCommand(args[5], COLORS_COMMAND);
-		try {
-			Board.setRows(Integer.valueOf(rows));
-			Board.setColumns(Integer.valueOf(cols));
-//			Board.setGoalPoints(Integer.valueOf(goalPoints));
-//			Board.setMaxMovements(Integer.valueOf(movements));
-			Board.setMaxColors(Integer.valueOf(colors));
-		} catch(NumberFormatException e) {
-			throw new IllegalArgumentException("Error parsing board arguments");
-		}
+		Board board = new Board(Integer.valueOf(rows),Integer.valueOf(cols),Integer.valueOf(colors));
+		return board;
 	}
 	
 	private static String parseCommand(String value, String comandPrefix) {
