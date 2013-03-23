@@ -56,7 +56,7 @@ public class DeepTripProblem implements GPSProblem{
 		case STEPS:
 			return stepsHValue(board);
 		case COLORS:
-			return (board.getTileQty() * 6 + board.getLeftColorsQty() * (board.getCols() * board.getRows())) / 10;
+			return (board.getTileQty() * 6 + 4 * board.getLeftColorsQty() * (board.getCols() * board.getRows())) / 10;
 		case TILES:
 			return board.getTileQty();
 		default:
