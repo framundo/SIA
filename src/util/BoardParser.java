@@ -1,5 +1,8 @@
 package util;
 
+import gps.SearchStrategy;
+import gps.api.GPSProblem;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -10,6 +13,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import model.Board;
+import model.DeepTripProblem;
+import model.EngineImpl;
+import model.DeepTripProblem.Heuristic;
 
 public class BoardParser {
 	
@@ -50,8 +56,15 @@ public class BoardParser {
 	
 	public static void main(String[] args) throws IOException {
 		Collection<Board> boards = BoardParser.parse(new File("testBoards/5x5boards"));
+		long averageTime=0;
 		for(Board board: boards){
-			System.out.println(board);
+			GPSProblem problem = new DeepTripProblem(board, Heuristic.STEPS);
+			long answer = new EngineImpl().engine(problem, SearchStrategy.DFS);
+//			System.out.println(board);
+			System.out.println("time:"+answer);
+			averageTime += answer;
 		}
+		averageTime/=boards.size();
+		System.out.println("Promedio:"+averageTime);
 	}
 }
