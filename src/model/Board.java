@@ -27,6 +27,11 @@ public class Board implements GPSState, Cloneable {
 		this.maxColors = colors;
 	}
 	
+	public Board(int[][] tiles, int colors){
+		this(tiles, new int[colors],colors);
+		calculateColorQty();
+	}
+	
 	public Board(int rows, int cols, int colors){
 		this.rows = rows;
 		this.cols = cols;
