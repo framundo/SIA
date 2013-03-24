@@ -19,12 +19,12 @@ public class BoardGenerator {
 		int tries = Integer.valueOf(args[3]);
 
 		for (int i = 0; i < tries; i++) {
-			boolean answer = false;
-			while (!answer) {
+			Long answer = null;
+			while (answer == null) {
 				Board board = new Board(rows, cols, colors);
 				GPSProblem problem = new DeepTripProblem(board, Heuristic.TILES);
 				answer = new EngineImpl().engine(problem, SearchStrategy.AStar);
-				if(answer){
+				if(answer != null){
 					System.err.println(board);
 				}
 			}

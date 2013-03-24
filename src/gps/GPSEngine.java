@@ -21,7 +21,7 @@ public abstract class GPSEngine {
 	// Use this variable in the addNode implementation
 	private SearchStrategy strategy;
 
-	public boolean engine(GPSProblem myProblem, SearchStrategy myStrategy) {
+	public Long engine(GPSProblem myProblem, SearchStrategy myStrategy) {
 		//System.out.println("Arrancamos");
 		if (myStrategy == SearchStrategy.AStar || myStrategy == SearchStrategy.GREEDY) {
 			frontier = new InformedFrontier(ComparatorProvider.get(myStrategy));
@@ -39,6 +39,7 @@ public abstract class GPSEngine {
 		GPSNode rootNode = new GPSNode(rootState, null, null, 0, problem.getHValue(rootState));
 		boolean finished = false;
 		boolean failed = false;
+		long elapsedTime = 0;
 		
 		frontier.offer(rootNode);
 		while (!failed && !finished) {
@@ -54,18 +55,18 @@ public abstract class GPSEngine {
 				}
 			} else {
 				GPSNode currentNode = frontier.getNext(); 
-				//System.out.println("Probando nodo altura " + currentNode.getHeight() + " f vale " + (currentNode.getCost()+currentNode.getHValue()));
 				nodeMaxHeight = Math.max(nodeMaxHeight, currentNode.getHeight());
 				explored.add(currentNode);
 				if (isGoal(currentNode)) {
 					finished = true;
 					frontierTotalSize += frontier.size();
-					//System.out.println(currentNode.getSolution());
-					//System.out.println("Height of the solution: " + currentNode.getHeight());
-					//System.out.println("Generated nodes: " + (frontierTotalSize + explored.size()));
-					//System.out.println("Frontier nodes: " + frontierTotalSize);
-					//System.out.println("Expanded nodes: " + (explored.size() - 1));
-					//System.out.println("Time elapsed: " + (System.currentTimeMillis() - time0));
+//					System.out.println(currentNode.getSolution());
+//					System.out.println("Height of the solution: " + currentNode.getHeight());
+//					System.out.println("Generated nodes: " + (frontierTotalSize + explored.size()));
+//					System.out.println("Frontier nodes: " + frontierTotalSize);
+//					System.out.println("Expanded nodes: " + (explored.size() - 1));
+					elapsedTime = System.currentTimeMillis() - time0;
+//					System.out.println("Time elapsed: " + elapsedTime);
 				} else {
 					if (myStrategy != SearchStrategy.ID || iterativeDepth > currentNode.getHeight()) {
 						explode(currentNode);
@@ -75,12 +76,12 @@ public abstract class GPSEngine {
 		}
 		if (finished) {
 			//System.out.println("OK! solution found!");
-			return true;
+			return elapsedTime;
 		} else if (failed) {
 			//System.out.println("FAILED! solution not found!");
-			return false;
+			return null;
 		}
-		return false;
+		return null;
 	}
 
 	private  boolean isGoal(GPSNode currentNode) {
@@ -104,8 +105,7 @@ public abstract class GPSEngine {
 					&& !checkBranch(node, newState)
 					&& !checkOpenAndClosed(node.getCost() + rule.getCost(),
 							newState)) {
-				GPSNode newNode = new GPSNode(newState, node, rule, node.getCost()
-						+ rule.getCost(), problem.getHValue(newState));
+				GPSNode newNode = new GPSNode(newState, node, rule, node.getCost() + rule.getCost(), problem.getHValue(newState));
 				addNode(newNode);
 			}
 		}

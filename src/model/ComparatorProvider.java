@@ -16,12 +16,12 @@ public class ComparatorProvider {
 					if (node1 == null || node2 == null) {
 						throw new IllegalArgumentException("Comparing nulls");
 					}
-					int value1 = node1.getHValue() + node1.getCost();
-					int value2 = node2.getHValue() + node2.getCost();
-					if (value1 == value2) {
+					Double value1 = node1.getHValue() + node1.getCost();
+					Double value2 = node2.getHValue() + node2.getCost();
+					if (value1.equals(value2)) {
 						return node1.getHValue().compareTo(node2.getHValue()); //TODO check order
 					}
-					return value1 - value2;
+					return value1.compareTo(value2);
 				}
 			};
 		case GREEDY:

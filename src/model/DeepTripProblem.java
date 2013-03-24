@@ -9,7 +9,7 @@ import java.util.List;
 
 public class DeepTripProblem implements GPSProblem{
 
-	public enum Heuristic {TILES};
+	public enum Heuristic {TILES, COLORS, STEPS, EMPTY, GROUP};
 
 	private Heuristic heuristic;
 
@@ -28,8 +28,6 @@ public class DeepTripProblem implements GPSProblem{
 	@Override
 	public GPSState getInitState() {
 		return this.board;
-//				return new Board();
-	//	return Board.generateTestBoard();
 	}
 
 	@Override
@@ -49,40 +47,41 @@ public class DeepTripProblem implements GPSProblem{
 	}
 
 	@Override
-	public Integer getHValue(GPSState state) {
+	public Double getHValue(GPSState state) {
 		Board board = (Board)state;
-//		if (board.isDeadEnd()) {
-//			return Integer.MAX_VALUE;
-//		}
+		if (board.isDeadEnd()) {
+			return Double.MAX_VALUE;
+		}
 		switch(heuristic){
+		case STEPS:
+			return stepsHValue(board);
+		case COLORS:
+			return (double)(board.getTileQty() * 6 + 4*board.getLeftColorsQty() * (board.getCols() * board.getRows())) / 10;
 		case TILES:
-			return tilesHValue(board);
+			return (double)board.getTileQty();
+		case EMPTY:
+			return emptyHValue(board);
+		case GROUP:
+			return groupHValue(board);
 		default:
 			return null;
 		}
 	}
-	
 
-//	private Double stepsHValue(Board board) {
-//		return tilesHValue(board)/(Board.getRows()*Board.getCols());
-//	}
-
-	private Integer tilesHValue(Board board) {
-		int qty = 0;
-		int rows = board.getRows();
-		int cols = board.getCols();
-		for(int i = 0; i<rows; i++) {
-			boolean empty = true;
-			for(int j = 0; j < cols; j++) {
-				if (board.getTile(i, j) != Board.EMPTY) {
-					qty++;
-					empty = false;
-				}
-			}
-			if(empty) {
-				return qty;
-			}
+	private Double stepsHValue(Board board) {
+		double hVal = 0;
+		for(int color = 0; color<board.getMaxColors(); color++) {
+			hVal += board.getColorQty(color + 1) / 3;
 		}
-		return qty;
+		return hVal;
+	}
+	
+	private Double emptyHValue(Board board){
+		int blank = board.getRows() * board.getCols() - board.getTileQty();
+		return 1.0 / ((blank+1) * board.getMovements());
+	}
+	
+	private Double groupHValue(Board board){
+		return (double)board.getTileQty() / (2*(board.getGroupQty() + 1));
 	}
 }

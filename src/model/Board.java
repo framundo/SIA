@@ -10,26 +10,48 @@ import java.util.Random;
 import java.util.Set;
 
 public class Board implements GPSState, Cloneable {
+	
 	static final int EMPTY = 0;
-
+	private static final int[][] HASH_MATRIX = {{2,3,5,7,11,13,17,19,23,29},
+		{31,37,41,43,47,53,59,61,67,71},
+		{73,79,83,89,97,101,103,107,109,113},
+		{127,131,137,139,149,151,157,163,167,173},
+		{179,181,191,193,197,199,211,223,227,229},
+		{233,239,241,251,257,263,269,271,277,281},
+		{283,293,307,311,313,317,331,337,347,349},
+		{353,359,367,373,379,383,389,397,401,409},
+		{419,421,431,433,439,443,449,457,461,463},
+		{467,479,487,491,499,503,509,521,523,541}};
+	
+	
 	private int rows;
 	private int cols;
-	private int max_colors;
+	private int maxColors;
 
 	private int[][] tiles;
-	private int[] colorQty; 
+	private int[] colorQty;
+	private int movements;
 
-	private Board(int tiles[][], int[] colorQty) {
+	private Board(int tiles[][], int[] colorQty, int colors, int movements) {
 		this.tiles = tiles;
 		this.colorQty = colorQty;
+		rows = tiles.length;
+		cols = tiles[0].length;
+		this.maxColors = colors;
+		this.movements = movements;
+	}
+	
+	public Board(int[][] tiles, int colors){
+		this(tiles, new int[colors],colors, 0);
+		calculateColorQty();
 	}
 	
 	public Board(int rows, int cols, int colors){
 		this.rows = rows;
 		this.cols = cols;
-		this.max_colors = colors;
+		this.maxColors = colors;
 		this.tiles = new int[rows][cols];
-		this.colorQty = new int[max_colors];
+		this.colorQty = new int[maxColors];
 		generate(rows);
 	}
 	
@@ -39,6 +61,10 @@ public class Board implements GPSState, Cloneable {
 	
 	public int getCols(){
 		return this.cols;
+	}
+	
+	public int getMovements(){
+		return movements;
 	}
 	
 	public void setRows(int rows) {
@@ -59,7 +85,7 @@ public class Board implements GPSState, Cloneable {
 		if(colors <= 0) {
 			throw new IllegalArgumentException("Invalid colors value: " + colors);
 		}
-		this.max_colors = colors;
+		this.maxColors = colors;
 	}
 
 	@Override
@@ -91,11 +117,7 @@ public class Board implements GPSState, Cloneable {
 				clonedTiles[i][j] = this.tiles[i][j];
 			}
 		}
-		Board cloned = new Board(clonedTiles, Arrays.copyOf(colorQty, max_colors));
-		cloned.setRows(this.rows);
-		cloned.setColumns(this.cols);
-		cloned.setMaxColors(this.max_colors);
-		
+		Board cloned = new Board(clonedTiles, Arrays.copyOf(colorQty, maxColors), maxColors, movements);
 		return cloned;
 	}
 
@@ -120,11 +142,35 @@ public class Board implements GPSState, Cloneable {
 			shifted[i] = tiles[row][(i + amount) % cols];
 		}
 		tiles[row] = shifted;
+		movements++;
 		return check();
 	}
 
+
+	public int getTileQty() {
+		int qty = 0;
+		for(int i = 0; i<maxColors; i++) {
+			qty+=colorQty[i];
+		}
+		return qty;
+	}
+
+	public int getLeftColorsQty() {
+		int qty = 0;
+		for(int i = 0; i<maxColors; i++) {
+			if(colorQty[i] != 0) {
+				qty++;
+			}
+		}
+		return qty;
+	}
+	
+	public int getColorQty(int color) {
+		return colorQty[color-1];
+	}
+	
 	boolean isDeadEnd() {
-		for(int i = 0; i<max_colors; i++) {
+		for(int i = 0; i<maxColors; i++) {
 			if (colorQty[i] == 1 || colorQty[i] == 2) {
 				return true;
 			}
@@ -198,9 +244,9 @@ public class Board implements GPSState, Cloneable {
 	
 	private void generateTile(int row, int col) {
 		Random rand = new Random();
-		tiles[row][col] = rand.nextInt(max_colors) + 1;
+		tiles[row][col] = rand.nextInt(maxColors) + 1;
 		while(adjacentTiles(row, col).size()>=3){
-			tiles[row][col] = rand.nextInt(max_colors) + 1;
+			tiles[row][col] = rand.nextInt(maxColors) + 1;
 		}
 		colorQty[tiles[row][col]-1]++;
 	}
@@ -243,17 +289,6 @@ public class Board implements GPSState, Cloneable {
 		return row >= 0 && col >= 0 && row < rows && col < cols;
 	}
 
-//	public static void main(String[] args) throws NotAppliableException {
-////		Board board = generateTestBoard();
-//		System.out.println(board);
-//		board.shift(1, 4);
-//		board.shift(2, 3);
-//		board.tiles[4][0] = 0;
-//		board.tiles[4][1] = 0;
-////		board.fill();
-//		System.out.println(board);
-//	}
-	
 	public static Board generateTestBoard(){
 		int[][] tiles = {
 				{1,2,3,4,5,6,7,8},
@@ -295,7 +330,7 @@ public class Board implements GPSState, Cloneable {
 		Board board;// = new Board(realTiles);//, MAX_MOVEMENTS, 0);
 		int[][] depth7board = {{2, 3, 2, 3}, {4, 2, 1, 4}, {2, 3, 1, 3}, {4, 3, 4, 1}};
 		int[] colors = {3, 4, 5, 4};
-		board = new Board(depth7board, colors);
+		board = new Board(depth7board, colors, 4, 0);
 		return board;
 	}
 	
@@ -308,7 +343,31 @@ public class Board implements GPSState, Cloneable {
 		return true;
 	}
 
-	int getTile(int i, int j) {
-		return tiles[i][j];
+	public int getMaxColors() {
+		return maxColors;
+	}
+
+	public int getGroupQty() {
+		int groups = 0;
+		for(int row=0; row<rows; row++){
+			for(int col=0; col<cols; col++){
+				if(adjacentTiles(row, col).size()==2){
+					groups++;
+				}
+			}
+		}
+		return groups/2;
+	}
+	
+	
+	@Override
+	public int hashCode(){
+		int hash = 1;
+		for( int i = 0; i<this.rows; i++ ){
+			for( int j = 0; j<this.cols; j++ ){
+				hash*= Math.pow(HASH_MATRIX[i][j],tiles[i][j]);
+			}
+		}
+		return hash;
 	}
 }
