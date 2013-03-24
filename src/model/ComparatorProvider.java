@@ -1,18 +1,18 @@
 package model;
 
-import gps.GPSNode;
+import gps.GpsNode;
 import gps.SearchStrategy;
 
 import java.util.Comparator;
 
 public class ComparatorProvider {
 
-	public static Comparator<GPSNode> get(SearchStrategy strategy) {
+	public static Comparator<GpsNode> get(SearchStrategy strategy) {
 		switch(strategy) {
 		case AStar:
-			return new Comparator<GPSNode>() {
+			return new Comparator<GpsNode>() {
 				@Override
-				public int compare(GPSNode node1, GPSNode node2) {
+				public int compare(GpsNode node1, GpsNode node2) {
 					if (node1 == null || node2 == null) {
 						throw new IllegalArgumentException("Comparing nulls");
 					}
@@ -25,9 +25,9 @@ public class ComparatorProvider {
 				}
 			};
 		case GREEDY:
-			return new Comparator<GPSNode>() {
+			return new Comparator<GpsNode>() {
 				@Override
-				public int compare(GPSNode node1, GPSNode node2) {
+				public int compare(GpsNode node1, GpsNode node2) {
 					if (node1 == null || node2 == null) {
 						throw new IllegalArgumentException("Comparing nulls");
 					}

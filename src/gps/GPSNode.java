@@ -1,18 +1,18 @@
 package gps;
 
-import gps.api.GPSRule;
-import gps.api.GPSState;
+import gps.api.GpsRule;
+import gps.api.GpsState;
 import model.DeepTripProblem;
-public class GPSNode {
+public class GpsNode {
 
-	private GPSState state;
-	private GPSNode parent;
-	private GPSRule rule;
+	private GpsState state;
+	private GpsNode parent;
+	private GpsRule rule;
 	private Integer cost;
 	private Double hValue;
 	private int height;
 	
-	public GPSNode(GPSState state, GPSNode parent, GPSRule rule, Integer cost, Double hValue) {
+	public GpsNode(GpsState state, GpsNode parent, GpsRule rule, Integer cost, Double hValue) {
 		super();
 		this.rule = rule;
 		this.parent = parent;
@@ -22,11 +22,11 @@ public class GPSNode {
 		this.height = parent == null ? 0 : parent.getHeight() + 1;
 	}
 
-	public GPSNode getParent() {
+	public GpsNode getParent() {
 		return parent;
 	}
 
-	public GPSState getState() {
+	public GpsState getState() {
 		return state;
 	}
 
@@ -61,6 +61,9 @@ public class GPSNode {
 	
 	@Override
 	public boolean equals(Object o) {
-		return state.equals(o);
+		if (!(o instanceof GpsNode)) {
+			return false;
+		}
+		return state.equals(((GpsNode)o).state);
 	}
 }

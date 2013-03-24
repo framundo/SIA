@@ -1,21 +1,20 @@
 package model;
 
 import gps.Frontier;
-import gps.GPSEngine;
-import gps.GPSNode;
+import gps.GpsEngine;
+import gps.GpsNode;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class EngineImpl extends GPSEngine{
+public class EngineImpl extends GpsEngine{
 
 	
 	@Override
-	public void addNode(GPSNode node) {
+	public void addNode(GpsNode node) {
 		Frontier frontier = getFrontier();
-		Set<GPSNode> explored = getExplored();
-		if(explored.contains(node) ){
-			System.out.println("vamo lopi");
+		Set<GpsNode> explored = getExplored();
+		if(explored.contains(node)){
 			return;
 		}
 		explored.add(node);

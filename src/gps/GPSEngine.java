@@ -1,8 +1,8 @@
 package gps;
 
-import gps.api.GPSProblem;
-import gps.api.GPSRule;
-import gps.api.GPSState;
+import gps.api.GpsProblem;
+import gps.api.GpsRule;
+import gps.api.GpsState;
 import gps.api.InformedFrontier;
 import gps.api.NaiveFrontier;
 import gps.exception.NotAppliableException;
@@ -12,16 +12,16 @@ import java.util.Set;
 
 import model.ComparatorProvider;
 
-public abstract class GPSEngine {
+public abstract class GpsEngine {
 
 	private Frontier frontier;
-	private Set<GPSNode> explored = new HashSet<GPSNode>();
-	private GPSProblem problem;
+	private Set<GpsNode> explored = new HashSet<GpsNode>();
+	private GpsProblem problem;
 
 	// Use this variable in the addNode implementation
 	private SearchStrategy strategy;
 
-	public Long engine(GPSProblem myProblem, SearchStrategy myStrategy) {
+	public Long engine(GpsProblem myProblem, SearchStrategy myStrategy) {
 		//System.out.println("Arrancamos");
 		if (myStrategy == SearchStrategy.AStar || myStrategy == SearchStrategy.GREEDY) {
 			frontier = new InformedFrontier(ComparatorProvider.get(myStrategy));
@@ -35,8 +35,8 @@ public abstract class GPSEngine {
 		int nodeMaxHeight = 0; // Used on ID
 		int frontierTotalSize = 0; 
 
-		GPSState rootState = problem.getInitState();
-		GPSNode rootNode = new GPSNode(rootState, null, null, 0, problem.getHValue(rootState));
+		GpsState rootState = problem.getInitState();
+		GpsNode rootNode = new GpsNode(rootState, null, null, 0, problem.getHValue(rootState));
 		boolean finished = false;
 		boolean failed = false;
 		long elapsedTime = 0;
@@ -54,7 +54,7 @@ public abstract class GPSEngine {
 					failed = true;
 				}
 			} else {
-				GPSNode currentNode = frontier.getNext(); 
+				GpsNode currentNode = frontier.getNext(); 
 				nodeMaxHeight = Math.max(nodeMaxHeight, currentNode.getHeight());
 				explored.add(currentNode);
 				if (isGoal(currentNode)) {
@@ -84,18 +84,18 @@ public abstract class GPSEngine {
 		return null;
 	}
 
-	private  boolean isGoal(GPSNode currentNode) {
+	private  boolean isGoal(GpsNode currentNode) {
 		return currentNode.getState().isGoal();
 	}
 
-	private  boolean explode(GPSNode node) {
+	private  boolean explode(GpsNode node) {
 		if(problem.getRules() == null){
 			System.err.println("No rules!");
 			return false;
 		}
 
-		for (GPSRule rule : problem.getRules()) {
-			GPSState newState = null;
+		for (GpsRule rule : problem.getRules()) {
+			GpsState newState = null;
 			try {
 				newState = rule.evalRule(node.getState());
 			} catch (NotAppliableException e) {
@@ -105,20 +105,20 @@ public abstract class GPSEngine {
 					&& !checkBranch(node, newState)
 					&& !checkOpenAndClosed(node.getCost() + rule.getCost(),
 							newState)) {
-				GPSNode newNode = new GPSNode(newState, node, rule, node.getCost() + rule.getCost(), problem.getHValue(newState));
+				GpsNode newNode = new GpsNode(newState, node, rule, node.getCost() + rule.getCost(), problem.getHValue(newState));
 				addNode(newNode);
 			}
 		}
 		return true;
 	}
 
-	private  boolean checkOpenAndClosed(Integer cost, GPSState state) {
-		for (GPSNode openNode : frontier.getCollection()) {
+	private  boolean checkOpenAndClosed(Integer cost, GpsState state) {
+		for (GpsNode openNode : frontier.getCollection()) {
 			if (openNode.getState().compare(state) && openNode.getCost() < cost) {
 				return true;
 			}
 		}
-		for (GPSNode closedNode : explored) {
+		for (GpsNode closedNode : explored) {
 			if (closedNode.getState().compare(state)
 					&& closedNode.getCost() < cost) {
 				return true;
@@ -127,7 +127,7 @@ public abstract class GPSEngine {
 		return false;
 	}
 
-	private  boolean checkBranch(GPSNode parent, GPSState state) {
+	private  boolean checkBranch(GpsNode parent, GpsState state) {
 		if (parent == null) {
 			return false;
 		}
@@ -135,7 +135,7 @@ public abstract class GPSEngine {
 				|| state.compare(parent.getState());
 	}
 
-	public abstract  void addNode(GPSNode node);
+	public abstract  void addNode(GpsNode node);
 
 	public boolean isInformed() {
 		return strategy.equals(SearchStrategy.AStar) || strategy.equals(SearchStrategy.GREEDY);
@@ -149,7 +149,7 @@ public abstract class GPSEngine {
 		return this.strategy;
 	}
 	
-	protected Set<GPSNode> getExplored() {
+	protected Set<GpsNode> getExplored() {
 		return explored;
 	}
 }

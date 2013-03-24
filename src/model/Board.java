@@ -1,6 +1,6 @@
 package model;
 
-import gps.api.GPSState;
+import gps.api.GpsState;
 import gps.exception.NotAppliableException;
 
 import java.awt.Point;
@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-public class Board implements GPSState, Cloneable {
+public class Board implements GpsState, Cloneable {
 	
 	static final int EMPTY = 0;
 	private static final int[][] HASH_MATRIX = {{2,3,5,7,11,13,17,19,23,29},
@@ -89,7 +89,7 @@ public class Board implements GPSState, Cloneable {
 	}
 
 	@Override
-	public boolean compare(GPSState state) {
+	public boolean compare(GpsState state) {
 		if (!(state instanceof Board)) {
 			return false;
 		}

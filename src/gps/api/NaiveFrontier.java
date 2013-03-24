@@ -1,14 +1,14 @@
 package gps.api;
 
 import gps.Frontier;
-import gps.GPSNode;
+import gps.GpsNode;
 
 import java.util.Collection;
 import java.util.LinkedList;
 
 public class NaiveFrontier implements Frontier {
 
-	private LinkedList<GPSNode> list = new LinkedList<GPSNode>();
+	private LinkedList<GpsNode> list = new LinkedList<GpsNode>();
 	
 	@Override
 	public int size() {
@@ -16,22 +16,22 @@ public class NaiveFrontier implements Frontier {
 	}
 
 	@Override
-	public GPSNode getNext() {
+	public GpsNode getNext() {
 		return list.poll();
 	}
 
 	@Override
-	public Collection<GPSNode> getCollection() {
+	public Collection<GpsNode> getCollection() {
 		return list;
 	}
 
 	@Override
-	public void push(GPSNode node) {
+	public void push(GpsNode node) {
 		list.push(node);
 	}
 
 	@Override
-	public void offer(GPSNode node) {
+	public void offer(GpsNode node) {
 		list.offer(node);
 	}
 

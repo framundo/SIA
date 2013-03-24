@@ -1,7 +1,7 @@
 package solver;
 
 import gps.SearchStrategy;
-import gps.api.GPSProblem;
+import gps.api.GpsProblem;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class ProblemSolver {
 				return;
 			}
 		}
-		GPSProblem problem = new DeepTripProblem(board, heuristic);
+		GpsProblem problem = new DeepTripProblem(board, heuristic);
 		(new EngineImpl()).engine(problem, strategy);
 	}
 	

@@ -4,15 +4,15 @@ import java.util.Collection;
 
 public interface Frontier {
 
-	public void push(GPSNode node);
+	public void push(GpsNode node);
 
-	public void offer(GPSNode node);
+	public void offer(GpsNode node);
 	
 	public int size();
 
-	public GPSNode getNext();
+	public GpsNode getNext();
 
-	public 	Collection<GPSNode> getCollection();
+	public 	Collection<GpsNode> getCollection();
 
 	public boolean isEmpty();
 }
