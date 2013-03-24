@@ -325,4 +325,23 @@ public class Board implements GPSState, Cloneable {
 		}
 		return hash;
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Board)) {
+			return false;
+		}
+		Board other = (Board)o;
+		if (this.cols != other.cols || this.rows != other.rows || this.maxColors != other.maxColors) {
+			return false;
+		}
+		for(int i = 0; i<this.rows; i++ ){
+			for( int j = 0; j<this.cols; j++ ){
+				if (tiles[i][j] != other.tiles[i][j]) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 }

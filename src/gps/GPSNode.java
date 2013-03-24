@@ -58,4 +58,9 @@ public class GPSNode {
 	public int hashCode(){
 		return this.state.hashCode();
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		return state.equals(o);
+	}
 }
