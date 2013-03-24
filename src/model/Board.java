@@ -10,25 +10,39 @@ import java.util.Random;
 import java.util.Set;
 
 public class Board implements GPSState, Cloneable {
+	
 	static final int EMPTY = 0;
-
+	private static final int[][] HASH_MATRIX = {{2,3,5,7,11,13,17,19,23,29},
+		{31,37,41,43,47,53,59,61,67,71},
+		{73,79,83,89,97,101,103,107,109,113},
+		{127,131,137,139,149,151,157,163,167,173},
+		{179,181,191,193,197,199,211,223,227,229},
+		{233,239,241,251,257,263,269,271,277,281},
+		{283,293,307,311,313,317,331,337,347,349},
+		{353,359,367,373,379,383,389,397,401,409},
+		{419,421,431,433,439,443,449,457,461,463},
+		{467,479,487,491,499,503,509,521,523,541}};
+	
+	
 	private int rows;
 	private int cols;
 	private int maxColors;
 
 	private int[][] tiles;
-	private int[] colorQty; 
+	private int[] colorQty;
+	private int movements;
 
-	private Board(int tiles[][], int[] colorQty, int colors) {
+	private Board(int tiles[][], int[] colorQty, int colors, int movements) {
 		this.tiles = tiles;
 		this.colorQty = colorQty;
 		rows = tiles.length;
 		cols = tiles[0].length;
 		this.maxColors = colors;
+		this.movements = movements;
 	}
 	
 	public Board(int[][] tiles, int colors){
-		this(tiles, new int[colors],colors);
+		this(tiles, new int[colors],colors, 0);
 		calculateColorQty();
 	}
 	
@@ -47,6 +61,10 @@ public class Board implements GPSState, Cloneable {
 	
 	public int getCols(){
 		return this.cols;
+	}
+	
+	public int getMovements(){
+		return movements;
 	}
 	
 	public void setRows(int rows) {
@@ -99,7 +117,7 @@ public class Board implements GPSState, Cloneable {
 				clonedTiles[i][j] = this.tiles[i][j];
 			}
 		}
-		Board cloned = new Board(clonedTiles, Arrays.copyOf(colorQty, maxColors), maxColors);
+		Board cloned = new Board(clonedTiles, Arrays.copyOf(colorQty, maxColors), maxColors, movements);
 		return cloned;
 	}
 
@@ -124,6 +142,7 @@ public class Board implements GPSState, Cloneable {
 			shifted[i] = tiles[row][(i + amount) % cols];
 		}
 		tiles[row] = shifted;
+		movements++;
 		return check();
 	}
 
@@ -282,49 +301,47 @@ public class Board implements GPSState, Cloneable {
 	public int getMaxColors() {
 		return maxColors;
 	}
+
+	public int getGroupQty() {
+		int groups = 0;
+		for(int row=0; row<rows; row++){
+			for(int col=0; col<cols; col++){
+				if(adjacentTiles(row, col).size()==2){
+					groups++;
+				}
+			}
+		}
+		return groups/2;
+	}
 	
-//	public static Board generateTestBoard(){
-//		int[][] tiles = {
-//				{1,2,3,4,5,6,7,8},
-//				{2,3,4,5,6,7,8,1},
-//				{3,4,5,6,7,8,1,2},
-//				{4,5,6,7,8,1,2,3},
-//				{5,6,7,8,1,2,3,4},
-//				{6,7,8,1,2,3,4,5},
-//				{7,8,1,2,3,4,5,6},
-//				{8,1,2,3,4,5,6,7},
-//				{1,2,3,4,5,6,7,8},
-//				{2,3,4,5,6,7,8,1},
-//				{3,4,5,6,7,8,1,2},
-//				{4,5,6,7,8,1,2,3},
-//				{5,6,7,8,1,2,3,4},
-//				{6,7,8,1,2,3,4,5},
-//				{7,8,1,2,3,4,5,6},
-//				{8,1,2,3,4,5,6,7},
-//				{1,2,3,4,5,6,7,8},
-//				{2,3,4,5,6,7,8,1},
-//				{3,4,5,6,7,8,1,2},
-//				{4,5,6,7,8,1,2,3},
-//				{5,6,7,8,1,2,3,4},
-//				{6,7,8,1,2,3,4,5},
-//				{7,8,1,2,3,4,5,6},
-//				{8,1,2,3,4,5,6,7},
-//				{3,4,5,6,7,8,1,2},
-//				{4,5,6,7,8,1,2,3},
-//				{5,6,7,8,1,2,3,4},
-//				{6,7,8,1,2,3,4,5},
-//				{7,8,1,2,3,4,5,6},
-//				{8,1,2,3,4,5,6,7}};
-//		int[][] realTiles = new int[4][4];
-//		for (int i =0; i<4; i++) {
-//			for (int j =0; j<4; j++) {
-//				realTiles[i][j] = tiles[i][j];
-//			}
-//		}
-//		Board board;// = new Board(realTiles);//, MAX_MOVEMENTS, 0);
-//		int[][] depth7board = {{2, 3, 2, 3}, {4, 2, 1, 4}, {2, 3, 1, 3}, {4, 3, 4, 1}};
-//		int[] colors = {3, 4, 5, 4};
-//		board = new Board(depth7board, colors, 4);
-//		return board;
-//	}
+	
+	@Override
+	public int hashCode(){
+		int hash = 1;
+		for( int i = 0; i<this.rows; i++ ){
+			for( int j = 0; j<this.cols; j++ ){
+				hash*= Math.pow(HASH_MATRIX[i][j],tiles[i][j]);
+			}
+		}
+		return hash;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Board)) {
+			return false;
+		}
+		Board other = (Board)o;
+		if (this.cols != other.cols || this.rows != other.rows || this.maxColors != other.maxColors) {
+			return false;
+		}
+		for(int i = 0; i<this.rows; i++ ){
+			for( int j = 0; j<this.cols; j++ ){
+				if (tiles[i][j] != other.tiles[i][j]) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 }

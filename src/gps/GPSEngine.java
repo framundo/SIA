@@ -7,15 +7,15 @@ import gps.api.InformedFrontier;
 import gps.api.NaiveFrontier;
 import gps.exception.NotAppliableException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import model.ComparatorProvider;
 
 public abstract class GPSEngine {
 
 	private Frontier frontier;
-	private List<GPSNode> explored = new ArrayList<GPSNode>();
+	private Set<GPSNode> explored = new HashSet<GPSNode>();
 	private GPSProblem problem;
 
 	// Use this variable in the addNode implementation
@@ -147,5 +147,9 @@ public abstract class GPSEngine {
 	
 	public SearchStrategy getStrategy(){
 		return this.strategy;
+	}
+	
+	protected Set<GPSNode> getExplored() {
+		return explored;
 	}
 }

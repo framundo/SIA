@@ -9,7 +9,7 @@ import java.util.List;
 
 public class DeepTripProblem implements GPSProblem{
 
-	public enum Heuristic {TILES, COLORS, STEPS};
+	public enum Heuristic {TILES, COLORS, STEPS, EMPTY, GROUP};
 
 	private Heuristic heuristic;
 
@@ -47,28 +47,41 @@ public class DeepTripProblem implements GPSProblem{
 	}
 
 	@Override
-	public Integer getHValue(GPSState state) {
+	public Double getHValue(GPSState state) {
 		Board board = (Board)state;
 		if (board.isDeadEnd()) {
-			return Integer.MAX_VALUE;
+			return Double.MAX_VALUE;
 		}
 		switch(heuristic){
 		case STEPS:
 			return stepsHValue(board);
 		case COLORS:
-			return (board.getTileQty() * 6 + 4 * board.getLeftColorsQty() * (board.getCols() * board.getRows())) / 10;
+			return (double)(board.getTileQty() * 6 + 4*board.getLeftColorsQty() * (board.getCols() * board.getRows())) / 10;
 		case TILES:
-			return board.getTileQty();
+			return (double)board.getTileQty();
+		case EMPTY:
+			return emptyHValue(board);
+		case GROUP:
+			return groupHValue(board);
 		default:
 			return null;
 		}
 	}
 
-	private Integer stepsHValue(Board board) {
-		int hVal = 0;
+	private Double stepsHValue(Board board) {
+		double hVal = 0;
 		for(int color = 0; color<board.getMaxColors(); color++) {
 			hVal += board.getColorQty(color + 1) / 3;
 		}
 		return hVal;
+	}
+	
+	private Double emptyHValue(Board board){
+		int blank = board.getRows() * board.getCols() - board.getTileQty();
+		return 1.0 / ((blank+1) * board.getMovements());
+	}
+	
+	private Double groupHValue(Board board){
+		return (double)board.getTileQty() / (2*(board.getGroupQty() + 1));
 	}
 }

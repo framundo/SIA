@@ -9,20 +9,20 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 
 import model.Board;
 import model.DeepTripProblem;
-import model.EngineImpl;
 import model.DeepTripProblem.Heuristic;
+import model.EngineImpl;
 
 public class BoardParser {
-	
-	public static Collection<Board> parseBoards(File file) throws IOException{
+
+	public static List<Board> parseBoards(File file) throws IOException{
 		BufferedReader br = new BufferedReader(new FileReader(file));
 		String s;
-		Set<Board> boards = new HashSet<Board>();
+		List<Board> boards = new LinkedList<Board>();
 		while((s=br.readLine())!=null){
 			ArrayList<int[]> tiles = null;
 			int rowNumber = 0;
@@ -84,23 +84,38 @@ public class BoardParser {
 				rowNumber++;
 				s = br.readLine();
 			}
+			br.close();
 			return new Board(tiles.toArray(new int[0][0]), colors);
 		}
 		br.close();
 		return null;
 	}
-	
-//	public static void main(String[] args) throws IOException {
-//		Collection<Board> boards = BoardParser.parse(new File("testBoards/5x5boards"));
-//		long averageTime=0;
-//		for(Board board: boards){
-//			GPSProblem problem = new DeepTripProblem(board, Heuristic.STEPS);
-//			long answer = new EngineImpl().engine(problem, SearchStrategy.DFS);
-////			System.out.println(board);
-//			System.out.println("time:"+answer);
-//			averageTime += answer;
-//		}
-//		averageTime/=boards.size();
-//		System.out.println("Promedio:"+averageTime);
-//	}
+
+	public static void main(String[] args) throws IOException {
+		Collection<Board> boards = BoardParser.parseBoards(new File("testBoards/6x6boards"));
+		long averageTime=0;
+		int count = 0;
+		for(Board board: boards){
+			GPSProblem problem = new DeepTripProblem(board, Heuristic.TILES);
+			Long answer = (new EngineImpl()).engine(problem, SearchStrategy.DFS);
+			if (answer !=null) {
+				System.out.println((count++)+" time:"+answer);
+				averageTime += answer;
+			}
+		}
+	}
+
+	//	public static void main(String[] args) throws IOException {
+	//		Collection<Board> boards = BoardParser.parse(new File("testBoards/5x5boards"));
+	//		long averageTime=0;
+	//		for(Board board: boards){
+	//			GPSProblem problem = new DeepTripProblem(board, Heuristic.STEPS);
+	//			long answer = new EngineImpl().engine(problem, SearchStrategy.DFS);
+	////			System.out.println(board);
+	//			System.out.println("time:"+answer);
+	//			averageTime += answer;
+	//		}
+	//		averageTime/=boards.size();
+	//		System.out.println("Promedio:"+averageTime);
+	//	}
 }

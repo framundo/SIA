@@ -9,10 +9,10 @@ public class GPSNode {
 	private GPSNode parent;
 	private GPSRule rule;
 	private Integer cost;
-	private Integer hValue;
+	private Double hValue;
 	private int height;
 	
-	public GPSNode(GPSState state, GPSNode parent, GPSRule rule, Integer cost, Integer hValue) {
+	public GPSNode(GPSState state, GPSNode parent, GPSRule rule, Integer cost, Double hValue) {
 		super();
 		this.rule = rule;
 		this.parent = parent;
@@ -38,7 +38,7 @@ public class GPSNode {
 		return height;
 	}
 	
-	public Integer getHValue() {
+	public Double getHValue() {
 		return hValue;
 	}
 
@@ -52,5 +52,15 @@ public class GPSNode {
 			return toString();
 		}
 		return this.parent.getSolution() + "\n" + toString();
+	}
+	
+	@Override
+	public int hashCode(){
+		return this.state.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		return state.equals(o);
 	}
 }
