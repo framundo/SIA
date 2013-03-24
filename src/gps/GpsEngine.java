@@ -10,6 +10,8 @@ import gps.exception.NotAppliableException;
 import java.util.HashSet;
 import java.util.Set;
 
+import util.StatisticData;
+
 import model.ComparatorProvider;
 
 public abstract class GpsEngine {
@@ -21,7 +23,7 @@ public abstract class GpsEngine {
 	// Use this variable in the addNode implementation
 	private SearchStrategy strategy;
 
-	public Long engine(GpsProblem myProblem, SearchStrategy myStrategy) {
+	public StatisticData engine(GpsProblem myProblem, SearchStrategy myStrategy) {
 		if (myStrategy == SearchStrategy.AStar || myStrategy == SearchStrategy.GREEDY) {
 			frontier = new InformedFrontier(ComparatorProvider.get(myStrategy));
 		} else {
@@ -40,6 +42,7 @@ public abstract class GpsEngine {
 		boolean finished = false;
 		boolean failed = false;
 		long elapsedTime = 0;
+		StatisticData data = new StatisticData();
 		
 		frontier.offer(rootNode);
 		while (!failed && !finished) {
@@ -61,13 +64,16 @@ public abstract class GpsEngine {
 				if (isGoal(currentNode)) {
 					finished = true;
 					frontierTotalSize += frontier.size();
-					System.out.println(currentNode.getSolution());
-					System.out.println("Height of the solution: " + currentNode.getHeight());
-					System.out.println("Generated nodes: " + (frontierTotalSize + explored.size()));
-					System.out.println("Frontier nodes: " + frontierTotalSize);
-					System.out.println("Expanded nodes: " + (explored.size() - 1 + exploredTotalSize));
+//					System.out.println(currentNode.getSolution());
+//					System.out.println("Height of the solution: " + currentNode.getHeight());
+//					System.out.println("Generated nodes: " + (frontierTotalSize + explored.size()));
+//					System.out.println("Frontier nodes: " + frontierTotalSize);
+//					System.out.println("Expanded nodes: " + (explored.size() - 1 + exploredTotalSize));
 					elapsedTime = System.currentTimeMillis() - time0;
-					System.out.println("Time elapsed: " + elapsedTime);
+//					System.out.println("Time elapsed: " + elapsedTime);
+					data.time = elapsedTime;
+					data.height = currentNode.getHeight();
+					data.nodes = (frontierTotalSize + explored.size());
 				} else {
 					if (myStrategy != SearchStrategy.ID || iterativeDepth > currentNode.getHeight()) {
 						explode(currentNode);
@@ -76,10 +82,10 @@ public abstract class GpsEngine {
 			}
 		}
 		if (finished) {
-			System.out.println("OK! solution found!");
-			return elapsedTime;
+//			System.out.println("OK! solution found!");
+			return data;
 		} else if (failed) {
-			System.out.println("FAILED! solution not found!");
+//			System.out.println("FAILED! solution not found!");
 			return null;
 		}
 		return null;
