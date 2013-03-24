@@ -1,13 +1,13 @@
 package model;
 
-import gps.api.GpsProblema;
-import gps.api.GpsRulea;
-import gps.api.GpsStatea;
+import gps.api.GpsProblem;
+import gps.api.GpsRule;
+import gps.api.GpsState;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeepTripProblem implements GpsProblema{
+public class DeepTripProblem implements GpsProblem{
 
 	public enum Heuristic {
 		/** H1 */
@@ -37,18 +37,18 @@ public class DeepTripProblem implements GpsProblema{
 	}
 	
 	@Override
-	public GpsStatea getInitState() {
+	public GpsState getInitState() {
 		return this.board;
 	}
 
 	@Override
-	public GpsStatea getGoalState() {
+	public GpsState getGoalState() {
 		return null;
 	}
 
 	@Override
-	public List<GpsRulea> getRules() {
-		List<GpsRulea> rules = new ArrayList<GpsRulea>(board.getRows()*(board.getCols()-1));
+	public List<GpsRule> getRules() {
+		List<GpsRule> rules = new ArrayList<GpsRule>(board.getRows()*(board.getCols()-1));
 		for(int i = 0; i < board.getRows(); i++){
 			for(int j = 1; j < board.getCols(); j++){
 				rules.add(new ShiftRule(i,j));
@@ -58,7 +58,7 @@ public class DeepTripProblem implements GpsProblema{
 	}
 
 	@Override
-	public Double getHValue(GpsStatea state) {
+	public Double getHValue(GpsState state) {
 		Board board = (Board)state;
 		if (board.isDeadEnd()) {
 			return Double.MAX_VALUE;

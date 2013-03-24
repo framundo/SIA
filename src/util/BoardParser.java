@@ -2,7 +2,7 @@ package util;
 
 import gps.GpsNode;
 import gps.SearchStrategy;
-import gps.api.GpsProblema;
+import gps.api.GpsProblem;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -99,7 +99,7 @@ public class BoardParser {
 		long averageTime=0;
 		int count = 0;
 		for(Board board: boards){
-			GpsProblema problem = new DeepTripProblem(board, Heuristic.TILES);
+			GpsProblem problem = new DeepTripProblem(board, Heuristic.TILES);
 			Long answer = (new EngineImpl()).engine(problem, SearchStrategy.BFS);
 			if (answer !=null) {
 				System.out.println((count++)+" time:"+answer);

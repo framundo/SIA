@@ -1,8 +1,8 @@
 package gps;
 
-import gps.api.GpsProblema;
-import gps.api.GpsRulea;
-import gps.api.GpsStatea;
+import gps.api.GpsProblem;
+import gps.api.GpsRule;
+import gps.api.GpsState;
 import gps.api.InformedFrontier;
 import gps.api.NaiveFrontier;
 import gps.exception.NotAppliableException;
@@ -16,12 +16,12 @@ public abstract class GpsEngine {
 
 	private Frontier frontier;
 	private Set<GpsNode> explored = new HashSet<GpsNode>();
-	private GpsProblema problem;
+	private GpsProblem problem;
 
 	// Use this variable in the addNode implementation
 	private SearchStrategy strategy;
 
-	public Long engine(GpsProblema myProblem, SearchStrategy myStrategy) {
+	public Long engine(GpsProblem myProblem, SearchStrategy myStrategy) {
 		//System.out.println("Arrancamos");
 		if (myStrategy == SearchStrategy.AStar || myStrategy == SearchStrategy.GREEDY) {
 			frontier = new InformedFrontier(ComparatorProvider.get(myStrategy));
@@ -35,7 +35,7 @@ public abstract class GpsEngine {
 		int nodeMaxHeight = 0; // Used on ID
 		int frontierTotalSize = 0; 
 
-		GpsStatea rootState = problem.getInitState();
+		GpsState rootState = problem.getInitState();
 		GpsNode rootNode = new GpsNode(rootState, null, null, 0, problem.getHValue(rootState));
 		boolean finished = false;
 		boolean failed = false;
@@ -94,8 +94,8 @@ public abstract class GpsEngine {
 			return false;
 		}
 
-		for (GpsRulea rule : problem.getRules()) {
-			GpsStatea newState = null;
+		for (GpsRule rule : problem.getRules()) {
+			GpsState newState = null;
 			try {
 				newState = rule.evalRule(node.getState());
 			} catch (NotAppliableException e) {
@@ -112,7 +112,7 @@ public abstract class GpsEngine {
 		return true;
 	}
 
-	private  boolean checkOpenAndClosed(Integer cost, GpsStatea state) {
+	private  boolean checkOpenAndClosed(Integer cost, GpsState state) {
 		for (GpsNode openNode : frontier.getCollection()) {
 			if (openNode.getState().compare(state) && openNode.getCost() < cost) {
 				return true;
@@ -127,7 +127,7 @@ public abstract class GpsEngine {
 		return false;
 	}
 
-	private  boolean checkBranch(GpsNode parent, GpsStatea state) {
+	private  boolean checkBranch(GpsNode parent, GpsState state) {
 		if (parent == null) {
 			return false;
 		}

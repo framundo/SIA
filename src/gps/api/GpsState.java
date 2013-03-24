@@ -3,7 +3,7 @@ package gps.api;
 /**
  * GPSState interface.
  */
-public interface GpsStatea {
+public interface GpsState {
 	
 	/**
 	 * Compares self to another state to determine
@@ -12,7 +12,7 @@ public interface GpsStatea {
 	 * @return true if self is the same as the state given,
 	 * false if they are different.
 	 */
-	boolean compare(GpsStatea state);
+	boolean compare(GpsState state);
 	
 	boolean isGoal();
 }

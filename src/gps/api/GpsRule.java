@@ -5,7 +5,7 @@ import gps.exception.NotAppliableException;
 /**
  * GPSRule interface.
  */
-public interface GpsRulea {
+public interface GpsRule {
 
 	/**
 	 * Provides the cost of the rule.
@@ -29,5 +29,5 @@ public interface GpsRulea {
 	 * @throws NotAppliableException if the rule can not be
 	 * applied to the received state.
 	 */
-	GpsStatea evalRule(GpsStatea state) throws NotAppliableException;
+	GpsState evalRule(GpsState state) throws NotAppliableException;
 }
