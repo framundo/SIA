@@ -26,8 +26,8 @@ public class ProblemSolver {
 //		}
 //		GPSProblem problem = new DeepTripProblem();
 //		(new EngineImpl()).engine(problem, strategy);
-		GPSProblem problem = new DeepTripProblem(Board.generateTestBoard(), Heuristic.TILES);
-		(new EngineImpl()).engine(problem, SearchStrategy.AStar);
+		//GPSProblem problem = new DeepTripProblem(Board.generateTestBoard(), Heuristic.TILES);
+		//(new EngineImpl()).engine(problem, SearchStrategy.AStar);
 	}
 	
 	private static SearchStrategy parseStrategy(String strategyCommand) {
