@@ -4,7 +4,6 @@ import gps.Frontier;
 import gps.GpsEngine;
 import gps.GpsNode;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class EngineImpl extends GpsEngine{

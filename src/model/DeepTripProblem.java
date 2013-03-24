@@ -19,7 +19,9 @@ public class DeepTripProblem implements GpsProblem{
 		/** H4 */
 		GROUP,
 		/** H5 */
-		EMPTY
+		EMPTY,
+		
+		NONE;
 	};
 
 	private Heuristic heuristic;
@@ -71,9 +73,9 @@ public class DeepTripProblem implements GpsProblem{
 		case COLORS:
 			return (double)(board.getTileQty() * 6 + 4*board.getLeftColorsQty() * (board.getCols() * board.getRows())) / 10;
 		case EMPTY:
-			return emptyHValue(board);
+			return (1.0 / ((board.getRows() * board.getCols() - board.getTileQty()+1) * board.getMovements()));
 		case GROUP:
-			return groupHValue(board);
+			return ((double)board.getTileQty()) / (2*(board.getGroupQty() + 1));
 		default:
 			return null;
 		}
@@ -85,14 +87,5 @@ public class DeepTripProblem implements GpsProblem{
 			hVal += board.getColorQty(color + 1) / 3;
 		}
 		return hVal;
-	}
-	
-	private Double emptyHValue(Board board){
-		int blank = board.getRows() * board.getCols() - board.getTileQty();
-		return 1.0 / ((blank+1) * board.getMovements());
-	}
-	
-	private Double groupHValue(Board board){
-		return (double)board.getTileQty() / (2*(board.getGroupQty() + 1));
-	}
+	}	
 }

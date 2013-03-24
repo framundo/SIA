@@ -1,24 +1,14 @@
 package util;
 
-import gps.GpsNode;
-import gps.SearchStrategy;
-import gps.api.GpsProblem;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import model.Board;
-import model.DeepTripProblem;
-import model.DeepTripProblem.Heuristic;
-import model.EngineImpl;
 
 public class BoardParser {
 
@@ -65,7 +55,7 @@ public class BoardParser {
 			ArrayList<int[]> tiles = null;
 			int rowNumber = 0;
 			int colors = 0;
-			while(s.length()!=0){
+			while(s!=null && s.length()!=0){
 				String[] row = s.split(",");
 				int size = row.length-1;
 				if(rowNumber==0){
@@ -94,18 +84,18 @@ public class BoardParser {
 		return null;
 	}
 
-	public static void main(String[] args) throws IOException {
-		Collection<Board> boards = BoardParser.parseBoards(new File("testBoards/5x5boards"));
-		long averageTime=0;
-		int count = 0;
-		for(Board board: boards){
-			GpsProblem problem = new DeepTripProblem(board, Heuristic.TILES);
-			Long answer = (new EngineImpl()).engine(problem, SearchStrategy.BFS);
-			if (answer !=null) {
-				System.out.println((count++)+" time:"+answer);
-				averageTime += answer;
-			}
-		}
-		System.out.println(averageTime);
-	}
+//	public static void main(String[] args) throws IOException {
+//		Collection<Board> boards = BoardParser.parseBoards(new File("testBoards/6x6boards"));
+//		long averageTime=0;
+//		int count = 0;
+//		for(Board board: boards){
+//			GpsProblem problem = new DeepTripProblem(board, Heuristic.TILES);
+//			Long answer = (new EngineImpl()).engine(problem, SearchStrategy.DFS);
+//			if (answer !=null) {
+//				System.out.println((count++)+" time:"+answer);
+//				averageTime += answer;
+//			}
+//		}
+//		System.out.println(averageTime);
+//	}
 }

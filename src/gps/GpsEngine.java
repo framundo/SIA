@@ -22,7 +22,6 @@ public abstract class GpsEngine {
 	private SearchStrategy strategy;
 
 	public Long engine(GpsProblem myProblem, SearchStrategy myStrategy) {
-		//System.out.println("Arrancamos");
 		if (myStrategy == SearchStrategy.AStar || myStrategy == SearchStrategy.GREEDY) {
 			frontier = new InformedFrontier(ComparatorProvider.get(myStrategy));
 		} else {
@@ -34,6 +33,7 @@ public abstract class GpsEngine {
 		int iterativeDepth = 1;
 		int nodeMaxHeight = 0; // Used on ID
 		int frontierTotalSize = 0; 
+		int exploredTotalSize = 0;
 
 		GpsState rootState = problem.getInitState();
 		GpsNode rootNode = new GpsNode(rootState, null, null, 0, problem.getHValue(rootState));
@@ -45,9 +45,10 @@ public abstract class GpsEngine {
 		while (!failed && !finished) {
 			if (frontier.isEmpty()) {
 				if (myStrategy == SearchStrategy.ID && iterativeDepth == nodeMaxHeight) { // Tengo que aumentar el nivel si o si
-					System.out.println(iterativeDepth +" ->" + (iterativeDepth+1));
 					iterativeDepth++;
 					frontierTotalSize += frontier.size();
+					exploredTotalSize += explored.size();
+					explored = new HashSet<GpsNode>();
 					frontier = new NaiveFrontier();
 					frontier.offer(rootNode);
 				} else {
@@ -64,7 +65,7 @@ public abstract class GpsEngine {
 					System.out.println("Height of the solution: " + currentNode.getHeight());
 					System.out.println("Generated nodes: " + (frontierTotalSize + explored.size()));
 					System.out.println("Frontier nodes: " + frontierTotalSize);
-					System.out.println("Expanded nodes: " + (explored.size() - 1));
+					System.out.println("Expanded nodes: " + (explored.size() - 1 + exploredTotalSize));
 					elapsedTime = System.currentTimeMillis() - time0;
 					System.out.println("Time elapsed: " + elapsedTime);
 				} else {

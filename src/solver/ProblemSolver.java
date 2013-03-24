@@ -22,16 +22,21 @@ public class ProblemSolver {
 	private static final String FILE_COMMAND = "file=";
 
 	public static void main(String[] args) {
-		if (args.length != 2 && args.length != 5 && args.length != 3) { // strategia y heurist
+		if (args.length < 2 || args.length > 5) {
 			throw new IllegalArgumentException("Invalid argument quantity");
 		}
 		SearchStrategy strategy = parseStrategy(args[0]);
-		Heuristic heuristic = parseHeuristic(args[1]);
+		Heuristic heuristic = Heuristic.NONE;
+		int withBoardLength = 4;
+		if (strategy.equals(SearchStrategy.AStar) || strategy.equals(SearchStrategy.GREEDY)) {
+			heuristic = parseHeuristic(args[1]);
+			withBoardLength++;
+		}
 		Board board;
-		if (args.length == 5) { // especifico los valores del board
-			board = parseAndSetBoardValues(args);
+		if (args.length == withBoardLength) { // especifico los valores del board
+			board = parseAndSetBoardValues(args, !heuristic.equals(Heuristic.NONE));
 		} else { // sale file papa
-			String file = parseCommand(args[2], FILE_COMMAND);
+			String file = parseCommand(args[heuristic.equals(Heuristic.NONE) ? 1 : 2], FILE_COMMAND);
 			try { 
 				board = BoardParser.parseBoard(new File(file));
 			} catch(IOException e) {
@@ -61,10 +66,14 @@ public class ProblemSolver {
 		}
 	}
 	
-	private static Board parseAndSetBoardValues(String[] args) {
-		String rows = parseCommand(args[2], ROWS_COMMAND);		
-		String cols = parseCommand(args[3], COLS_COMMAND);
-		String colors = parseCommand(args[4], COLORS_COMMAND);
+	private static Board parseAndSetBoardValues(String[] args, boolean withHeuristic) {
+		int index = 1;
+		if(withHeuristic) {
+			index++;
+		}
+		String rows = parseCommand(args[index++], ROWS_COMMAND);		
+		String cols = parseCommand(args[index++], COLS_COMMAND);
+		String colors = parseCommand(args[index++], COLORS_COMMAND);
 		try {
 			Board board = new Board(Integer.valueOf(rows),Integer.valueOf(cols),Integer.valueOf(colors));
 			return board;

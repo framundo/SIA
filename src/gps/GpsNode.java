@@ -2,7 +2,6 @@ package gps;
 
 import gps.api.GpsRule;
 import gps.api.GpsState;
-import model.DeepTripProblem;
 public class GpsNode {
 
 	private GpsState state;
