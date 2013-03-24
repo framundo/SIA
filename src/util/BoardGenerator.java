@@ -1,7 +1,7 @@
 package util;
 
 import gps.SearchStrategy;
-import gps.api.GpsProblem;
+import gps.api.GpsProblema;
 import model.Board;
 import model.DeepTripProblem;
 import model.DeepTripProblem.Heuristic;
@@ -22,7 +22,7 @@ public class BoardGenerator {
 			Long answer = null;
 			while (answer == null) {
 				Board board = new Board(rows, cols, colors);
-				GpsProblem problem = new DeepTripProblem(board, Heuristic.TILES);
+				GpsProblema problem = new DeepTripProblem(board, Heuristic.TILES);
 				answer = new EngineImpl().engine(problem, SearchStrategy.AStar);
 				if(answer != null){
 					System.err.println(board);

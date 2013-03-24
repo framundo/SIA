@@ -1,18 +1,18 @@
 package gps;
 
-import gps.api.GpsRule;
-import gps.api.GpsState;
+import gps.api.GpsRulea;
+import gps.api.GpsStatea;
 import model.DeepTripProblem;
 public class GpsNode {
 
-	private GpsState state;
+	private GpsStatea state;
 	private GpsNode parent;
-	private GpsRule rule;
+	private GpsRulea rule;
 	private Integer cost;
 	private Double hValue;
 	private int height;
 	
-	public GpsNode(GpsState state, GpsNode parent, GpsRule rule, Integer cost, Double hValue) {
+	public GpsNode(GpsStatea state, GpsNode parent, GpsRulea rule, Integer cost, Double hValue) {
 		super();
 		this.rule = rule;
 		this.parent = parent;
@@ -26,7 +26,7 @@ public class GpsNode {
 		return parent;
 	}
 
-	public GpsState getState() {
+	public GpsStatea getState() {
 		return state;
 	}
 

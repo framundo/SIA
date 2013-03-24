@@ -1,10 +1,10 @@
 package model;
 
-import gps.api.GpsRule;
-import gps.api.GpsState;
+import gps.api.GpsRulea;
+import gps.api.GpsStatea;
 import gps.exception.NotAppliableException;
 
-public class ShiftRule implements GpsRule{
+public class ShiftRule implements GpsRulea{
 	
 	private int row, amount;
 
@@ -24,7 +24,7 @@ public class ShiftRule implements GpsRule{
 	}
 
 	@Override
-	public GpsState evalRule(GpsState state) throws NotAppliableException {
+	public GpsStatea evalRule(GpsStatea state) throws NotAppliableException {
 		Board board = ((Board) state).clone();
 		board.shift(row, amount);
 		return board;
