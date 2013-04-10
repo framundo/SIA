@@ -1,3 +1,8 @@
+function [E, S] = init()
+  E = [-1 -1; -1 1; 1 -1; 1 1];
+  S = [-1 -1 -1 1]';
+endfunction
+
 function o = calculate(W, data, g)
   h = 0;
   l = length(data);
@@ -28,15 +33,19 @@ function learn(E, S, eta, g, times)
   l = length(E(1, :));
   W = rand(1, l+1);
   for i = 1:times
-    index = 1+fix(rand()*l);
-    e = E(index, :)
+    index = 1+fix(rand()*length(E));
+    e = E(index, :);
     data = [-1 e];
     O = calculate(W, data, g);
     dif(i) = S(index) - O;
     delta = eta*dif(i)*data;
     W = W+delta;
-    O
-    disp("=============");
+    % O
+    % disp("=============");
+  endfor
+  for i = 1:length(E)
+    e = E(i, :)
+    O = calculate(W, data, g)
   endfor
   plot(dif)
 endfunction
