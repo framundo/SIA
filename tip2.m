@@ -45,7 +45,7 @@ function learn(E, S, eta, g, times)
   endfor
   for i = 1:length(E)
     e = E(i, :)
-    O = calculate(W, data, g)
+    O = calculate(W, [-1 e], g)
   endfor
   plot(dif)
 endfunction
