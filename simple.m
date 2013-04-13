@@ -1,3 +1,6 @@
+
+%backpropagation pagina 120
+
 function [E, S] = init()
   E = [-1 -1; -1 1; 1 -1; 1 1];
   S = [-1 -1 -1 1]';
