@@ -3,7 +3,7 @@ function [E, S] = init()
   S = [-1 1 1 -1]';
 endfunction
 
-function [o, h] = calculate(W, data, g, neurons)
+function [o, h] = calculate(W, data, g, neurons, b)
   l = length(data);
   h = zeros(1,neurons);
   for i = 1:neurons
@@ -12,9 +12,13 @@ function [o, h] = calculate(W, data, g, neurons)
     endfor
   endfor
   for i = 1:neurons
-    o(i) = g(h(i));
+    o(i) = g(h(i), b);
   endfor
 endfunction 
+
+function a = square(x)
+  a = x*x;
+end
 
 function out = step(x)
   if (x>0) 
@@ -24,17 +28,17 @@ function out = step(x)
   end
 endfunction
 
-function out = identity(x)
+function out = identity(x, b)
   out = x;
 endfunction
 
-function out = sigmoid(x)
-  out = tanh(x);
+function out = sigmoid(x, b)
+  out = tanh(b*x);
 endfunction
 
-function out = derivate(x, g)
+function out = derivate(x, g, b)
   if (g == @sigmoid)
-    out = 1 - g(x)**2;
+    out = b - b*g(x, b)**2;
   elseif (g == @identity)
     out=1;
   end
@@ -69,7 +73,8 @@ function out = palindrome(x)
 end
 
 
-function learn(S, eta, g, hidden_neurons, len, times, margin)
+function learn(S, eta, g, hidden_neurons, len, times, margin, b)
+  tic()
   Wh = rand(hidden_neurons, len+1);
   Wo = rand(1, hidden_neurons+1);
   flag = 1;
@@ -78,23 +83,23 @@ function learn(S, eta, g, hidden_neurons, len, times, margin)
       % index = 1 +fix(rand()*length(E));
       % e = E(index, :);
       % e = generateBits(len);
-      e = rand()*2*pi;
+      e = rand()*2-1;%*2*pi;
       data = [-1 e];
       % Atravesar neurona
-      [hidden_o, hidden_h] = calculate(Wh, data, g, hidden_neurons);
+      [hidden_o, hidden_h] = calculate(Wh, data, g, hidden_neurons, b);
       data2 = [-1 hidden_o];
-      [O, H] = calculate(Wo, data2, g, 1);
+      [O, H] = calculate(Wo, data2, g, 1, b);
       % Corregir para atrás
       dif(i) = S(e) - O;
       cuad(i) = 0.5*(S(e) - O)**2;
-      d_o = derivate(H, g) * dif(i);
+      d_o = derivate(H, g, b) * dif(i);
       delta_o = eta * d_o * data2;
       d_h = [];
       l = length(data);
       for i = 1:hidden_neurons
         %cableado a una sola salida
         inner_sum = Wo(1, i+1) * d_o;
-        d_h(i) = derivate(hidden_h(i),g) * inner_sum;
+        d_h(i) = derivate(hidden_h(i),g,b) * inner_sum;
       end
       delta_h = zeros(hidden_neurons,l);
       for i = 1:hidden_neurons
@@ -102,34 +107,43 @@ function learn(S, eta, g, hidden_neurons, len, times, margin)
           delta_h(i,j) = eta * d_h(i) * data(j);
         end
       end
+      % O
+      % H
+      % Wo
+      % Wh
+      % delta_o
+      % delta_h
       Wo += delta_o;
       Wh += delta_h; 
     endfor
     %batch
     i=0;
     flag = 0;
-    while (!flag && i < 2*pi)
-      if(abs(calculate(Wo, [-1 calculate(Wh, [-1 i], g, hidden_neurons)], g, 1) - S(i)) > margin)
-        disp("una vuelta mas");
-        flag = 1;
-      end
-      i+= 0.2;
-    endwhile
+    if (margin > 0)
+      while (!flag && i < 1)
+        if(abs(calculate(Wo, [-1 calculate(Wh, [-1 i], g, hidden_neurons, b)], g, 1, b) - S(i)) > margin)
+          % disp("una vuelta mas");
+          flag = 1;
+        end
+        i+= 0.1;
+      endwhile
+    endif
   endwhile
-  i =0;
+  i =-1;
   j=1;
-  while (i < 2*pi)
-    y(j) = calculate(Wo, [-1 calculate(Wh, [-1 i], g, hidden_neurons)], g, 1);
+  while (i < 1)
+    y(j) = calculate(Wo, [-1 calculate(Wh, [-1 i], g, hidden_neurons, b)], g, 1, b);
     y2(j) = S(i);
     x(j)=i;
     j++;
-    i+= 0.2;
+    i+= 0.1;
   end
-  plot(x,y, x, y2)
+  plot(x,y, x, y2);
   % for i = 1:length(E)
     % disp("RESULTADOS:")
     % e = E(i, :)
     % O = calculate(Wo, [-1 calculate(Wh, [-1 e], g, hidden_neurons)], g, 1)
   % endfor
   % plot(cuad)
+  toc()
 endfunction
