@@ -4,13 +4,7 @@ function [E, S] = init()
 endfunction
 
 function [o, h] = calculate(W, data, g, neurons, b)
-  l = length(data);
-  h = zeros(1,neurons);
-  for i = 1:neurons
-    for j = 1:l
-      h(i) += W(i,j)*data(j);
-    endfor
-  endfor
+  h = (W*data')';
   for i = 1:neurons
     o(i) = g(h(i), b);
   endfor
@@ -29,7 +23,7 @@ function out = step(x)
 endfunction
 
 function out = identity(x, b)
-  out = x;
+  out = b*x;
 endfunction
 
 function out = sigmoid(x, b)
@@ -40,7 +34,7 @@ function out = derivate(x, g, b)
   %if (g == @sigmoid)
     out = b - b*g(x, b)**2;
   %elseif (g == @identity)
-  %  out=1;
+   % out=b;
   %end
 endfunction
 
@@ -72,64 +66,92 @@ function out = palindrome(x)
   out = 1;
 end
 
-
-function learn(S, eta, g, hidden_neurons, len, times, margin, b)
+% Parametros
+% S: funcion
+% eta: eta 
+% g: funcion de activacion
+% len: tamaño de la entrada
+% times: iteraciones
+% margin: margen de error. Negativo si no se quiere
+% b: beta
+% adaptation: valor de adaptacion. Sugerido 0.1.
+% correction: vector [a b] de correccion de eta. [0 0] si no se quiere
+% calc_error: graficar error cuadratico medio
+function learn(S, eta, g, hidden_neurons, len, times, margin, b, adaptation, correction, calc_error)
   tic()
   Wh = rand(hidden_neurons, len+1);
   Wo = rand(1, hidden_neurons+1);
   flag = 1;
+	if(adaptation(1)==0 && adaptation(2)==0)
+		withAdaptation = 0;
+	else
+		withAdaptation = 1;
+	end
   while (flag)
-    for i = 1:times
+
+    for t = 1:times
       % Error cuadratico medio
-      cuad(i) = 0;
-      p = -1;
-      while (p < 1)
-        pattern_o = calculate(Wo, [-1 calculate(Wh, [-1 p], g, hidden_neurons, b)], g, 1, b);
-        pattern_s = S(p);
-        cuad(i)+=(pattern_s-pattern_o)**2;
-        p+= 0.1;
+      if(calc_error)
+        cuad(t) = 0;
+        p = -1;
+        while (p < 1)
+          pattern_o = calculate(Wo, [-1 calculate(Wh, [-1 p], g, hidden_neurons, b)], g, 1, b);
+          pattern_s = S(p);
+          cuad(t)+=(pattern_s-pattern_o)**2;
+          p+= 0.1;
+        end
+        cuad(t)/=(1/0.1);
       end
-      cuad(i)/=(1/0.1) 
+
       % index = 1 +fix(rand()*length(E));
       % e = E(index, :);
       % e = generateBits(len);
-      e = rand()*2-1;%*2*pi;
+      e = rand()*2*pi;
       data = [-1 e];
       % Atravesar neurona
       [hidden_o, hidden_h] = calculate(Wh, data, g, hidden_neurons, b);
       data2 = [-1 hidden_o];
       [O, H] = calculate(Wo, data2, g, 1, b);
       % Corregir para atrás
-      dif(i) = S(e) - O;
-      d_o = derivate(H, g, b) * dif(i);
+
+      dif(t) = S(e) - O;
+      d_o = (derivate(H, g, b) + correction) * dif(t);
       delta_o = eta * d_o * data2;
       d_h = [];
       l = length(data);
-      for i = 1:hidden_neurons
+      for k = 1:hidden_neurons
         %cableado a una sola salida
-        inner_sum = Wo(1, i+1) * d_o;
-        d_h(i) = derivate(hidden_h(i),g,b) * inner_sum;
+        inner_sum = Wo(1, k+1) * d_o;
+        d_h(k) = (correction + derivate(hidden_h(k),g,b)) * inner_sum;
       end
-      delta_h = zeros(hidden_neurons,l);
-      for i = 1:hidden_neurons
-        for j= 1:l
-          delta_h(i,j) = eta * d_h(i) * data(j);
-        end
-      end
+      delta_h = eta*d_h'*data;
       % O
       % H
       % Wo
       % Wh
       % delta_o
       % delta_h
-      Wo += delta_o;
-      Wh += delta_h;
+			if (withAdaptation && t>1)
+				if (dif(t) > dif(t-1))
+					%disp("eta bajo");
+					eta = eta*(1 - adaptation(2));
+					t--;
+				elseif (dif(t) < dif(t-1))
+					%disp("eta subio");
+					eta += adaptation(1);
+					Wo += delta_o;
+      		Wh += delta_h; 
+				end
+			else
+				Wo += delta_o;
+      	Wh += delta_h;
+			end
     endfor
     %batch
     i=0;
     flag = 0;
     if (margin > 0)
-      while (!flag && i < 1)
+      while (!flag && i < 2*pi)	
         if(abs(calculate(Wo, [-1 calculate(Wh, [-1 i], g, hidden_neurons, b)], g, 1, b) - S(i)) > margin)
           % disp("una vuelta mas");
           flag = 1;
@@ -138,21 +160,25 @@ function learn(S, eta, g, hidden_neurons, len, times, margin, b)
       endwhile
     endif
   endwhile
-  i =-1;
+  i =0;
   j=1;
-  while (i < 1)
+  while (i < 2*pi)
     y(j) = calculate(Wo, [-1 calculate(Wh, [-1 i], g, hidden_neurons, b)], g, 1, b);
     y2(j) = S(i);
     x(j)=i;
     j++;
     i+= 0.1;
   end
-  % plot(x,y, x, y2);
+  figure(1);
+  plot(x,y, x, y2);
   % for i = 1:length(E)
     % disp("RESULTADOS:")
     % e = E(i, :)
     % O = calculate(Wo, [-1 calculate(Wh, [-1 e], g, hidden_neurons)], g, 1)
   % endfor
-  plot(cuad)
+  if(calc_error)
+    figure(2);
+    plot(cuad);
+  end
   toc()
 endfunction
