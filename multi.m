@@ -76,10 +76,13 @@ end
 % correction: valor de correccion de la derivada de g. Sugerido 0.1.
 % adaptation: vector [a b t] de correccion de eta, t es cada cuanto se corrige, a y b los valores. [0 0 0] si no se quiere
 % calc_error: graficar error cuadratico medio
-function learn(S, eta, g, hidden_neurons, len, times, margin, b, adaptation, correction, calc_error)
+% momentum: valor entre 0 y 1
+function learn(S, eta, g, hidden_neurons, len, times, margin, b, adaptation, correction, momentum,calc_error)
   tic()
   Wh = rand(hidden_neurons, len+1);
   Wo = rand(1, hidden_neurons+1);
+  Wh_old = 0;
+  Wo_old = 0;
   flag = 1;
 	consecutive = [0 0];
 	if(adaptation(1)==0 && adaptation(2)==0)
@@ -125,6 +128,7 @@ function learn(S, eta, g, hidden_neurons, len, times, margin, b, adaptation, cor
       % Wh
       % delta_o
       % delta_h
+      
 			addDelta = 1;
 			if (withAdaptation && t>1)
 				if (dif(t) > dif(t-1))
@@ -148,10 +152,12 @@ function learn(S, eta, g, hidden_neurons, len, times, margin, b, adaptation, cor
 				endif
 			endif
 			if (addDelta)						
-				Wo += delta_o;
-	     	Wh += delta_h;
+				Wo += delta_o + momentum*Wo_old;
+	     	Wh += delta_h + momentum*Wh_old;
 			endif
     endfor
+    Wo_old = Wo;
+    Wh_old = Wh;
     %batch
     i=0;
     flag = 0;
