@@ -5,9 +5,7 @@ endfunction
 
 function [o, h] = calculate(W, data, g, neurons, b)
   h = (W*data')';
-  for i = 1:neurons
-    o(i) = g(h(i), b);
-  endfor
+	o = g(h,b);
 endfunction 
 
 function a = square(x)
@@ -32,7 +30,7 @@ endfunction
 
 function out = derivate(x, g, b)
   %if (g == @sigmoid)
-    out = b - b*g(x, b)**2;
+    out = b - b*g(x, b).**2;
   %elseif (g == @identity)
    % out=b;
   %end
@@ -67,6 +65,7 @@ function out = palindrome(x)
 end
 
 % Parametros
+%
 % S: funcion
 % eta: eta 
 % g: funcion de activacion
@@ -118,13 +117,7 @@ function learn(S, eta, g, hidden_neurons, len, times, margin, b, adaptation, cor
       dif(t) = S(e) - O;
       d_o = (derivate(H, g, b) + correction) * dif(t);
       delta_o = eta * d_o * data2;
-      d_h = [];
-      l = length(data);
-      for k = 1:hidden_neurons
-        %cableado a una sola salida
-        inner_sum = Wo(1, k+1) * d_o;
-        d_h(k) = (correction + derivate(hidden_h(k),g,b)) * inner_sum;
-      end
+			d_h = (correction + derivate(hidden_h, g, b)) .* (Wo(1, 2:end) .* d_o);
       delta_h = eta*d_h'*data;
       % O
       % H
