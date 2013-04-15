@@ -31,7 +31,7 @@ function out = sigmoid(x, b)
 endfunction
 
 function out = derivate(x, g, b)
- % if (g == @sigmoid)
+  %if (g == @sigmoid)
     out = b - b*g(x, b)**2;
   %elseif (g == @identity)
    % out=b;
@@ -76,7 +76,8 @@ end
 % b: beta
 % correction: valor de correccion de la derivada de g. Sugerido 0.1.
 % adaptation: vector [a b t] de correccion de eta, t es cada cuanto se corrige, a y b los valores. [0 0 0] si no se quiere
-function learn(S, eta, g, hidden_neurons, len, times, margin, b, adaptation, correction)
+% calc_error: graficar error cuadratico medio
+function learn(S, eta, g, hidden_neurons, len, times, margin, b, adaptation, correction, calc_error)
   tic()
   Wh = rand(hidden_neurons, len+1);
   Wo = rand(1, hidden_neurons+1);
@@ -88,7 +89,21 @@ function learn(S, eta, g, hidden_neurons, len, times, margin, b, adaptation, cor
 		withAdaptation = 1;
 	end
   while (flag)
+
     for t = 1:times
+      % Error cuadratico medio
+      if(calc_error)
+        cuad(t) = 0;
+        p = -1;
+        while (p < 1)
+          pattern_o = calculate(Wo, [-1 calculate(Wh, [-1 p], g, hidden_neurons, b)], g, 1, b);
+          pattern_s = S(p);
+          cuad(t)+=(pattern_s-pattern_o)**2;
+          p+= 0.1;
+        end
+        cuad(t)/=(1/0.1);
+      end
+
       % index = 1 +fix(rand()*length(E));
       % e = E(index, :);
       % e = generateBits(len);
@@ -99,8 +114,8 @@ function learn(S, eta, g, hidden_neurons, len, times, margin, b, adaptation, cor
       data2 = [-1 hidden_o];
       [O, H] = calculate(Wo, data2, g, 1, b);
       % Corregir para atrás
+
       dif(t) = S(e) - O;
-      cuad(t) = 0.5*(S(e) - O)**2;
       d_o = (derivate(H, g, b) + correction) * dif(t);
       delta_o = eta * d_o * data2;
       d_h = [];
@@ -166,12 +181,16 @@ function learn(S, eta, g, hidden_neurons, len, times, margin, b, adaptation, cor
     j++;
     i+= 0.1;
   end
+  figure(1);
   plot(x,y, x, y2);
   % for i = 1:length(E)
     % disp("RESULTADOS:")
     % e = E(i, :)
     % O = calculate(Wo, [-1 calculate(Wh, [-1 e], g, hidden_neurons)], g, 1)
   % endfor
-  % plot(cuad)
+  if(calc_error)
+    figure(2);
+    plot(cuad);
+  end
   toc()
 endfunction
