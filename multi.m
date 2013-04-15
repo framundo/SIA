@@ -74,13 +74,14 @@ end
 % times: iteraciones
 % margin: margen de error. Negativo si no se quiere
 % b: beta
-% adaptation: valor de adaptacion. Sugerido 0.1.
-% correction: vector [a b] de correccion de eta. [0 0] si no se quiere
+% correction: valor de correccion de la derivada de g. Sugerido 0.1.
+% adaptation: vector [a b t] de correccion de eta, t es cada cuanto se corrige, a y b los valores. [0 0 0] si no se quiere
 function learn(S, eta, g, hidden_neurons, len, times, margin, b, adaptation, correction)
   tic()
   Wh = rand(hidden_neurons, len+1);
   Wo = rand(1, hidden_neurons+1);
   flag = 1;
+	consecutive = [0 0];
 	if(adaptation(1)==0 && adaptation(2)==0)
 		withAdaptation = 0;
 	else
@@ -116,21 +117,32 @@ function learn(S, eta, g, hidden_neurons, len, times, margin, b, adaptation, cor
       % Wh
       % delta_o
       % delta_h
+			addDelta = 1;
 			if (withAdaptation && t>1)
 				if (dif(t) > dif(t-1))
+					consecutive(2)++;
+					consecutive(1)=0;
 					%disp("eta bajo");
-					eta = eta*(1 - adaptation(2));
-					t--;
+					if (adaptation(3) == consecutive(2))
+						consecutive(2) = 0;
+						eta = eta*(1 - adaptation(2));
+						t--;
+						addDelta = 0;
+					endif
 				elseif (dif(t) < dif(t-1))
+					consecutive(1)++;
+					consecutive(2)=0;
 					%disp("eta subio");
-					eta += adaptation(1);
-					Wo += delta_o;
-      		Wh += delta_h; 
-				end
-			else
+					if (adaptation(3) == consecutive(1))
+						consecutive(1) = 0;
+						eta += adaptation(1);
+					endif
+				endif
+			endif
+			if (addDelta)						
 				Wo += delta_o;
-      	Wh += delta_h;
-			end
+	     	Wh += delta_h;
+			endif
     endfor
     %batch
     i=0;
