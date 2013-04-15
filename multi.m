@@ -37,11 +37,11 @@ function out = sigmoid(x, b)
 endfunction
 
 function out = derivate(x, g, b)
-  if (g == @sigmoid)
+  %if (g == @sigmoid)
     out = b - b*g(x, b)**2;
-  elseif (g == @identity)
-    out=1;
-  end
+  %elseif (g == @identity)
+  %  out=1;
+  %end
 endfunction
 
 function out = generateBits(len)
@@ -80,6 +80,16 @@ function learn(S, eta, g, hidden_neurons, len, times, margin, b)
   flag = 1;
   while (flag)
     for i = 1:times
+      % Error cuadratico medio
+      cuad(i) = 0;
+      p = -1;
+      while (p < 1)
+        pattern_o = calculate(Wo, [-1 calculate(Wh, [-1 p], g, hidden_neurons, b)], g, 1, b);
+        pattern_s = S(p);
+        cuad(i)+=(pattern_s-pattern_o)**2;
+        p+= 0.1;
+      end
+      cuad(i)/=(1/0.1) 
       % index = 1 +fix(rand()*length(E));
       % e = E(index, :);
       % e = generateBits(len);
@@ -91,7 +101,6 @@ function learn(S, eta, g, hidden_neurons, len, times, margin, b)
       [O, H] = calculate(Wo, data2, g, 1, b);
       % Corregir para atrás
       dif(i) = S(e) - O;
-      cuad(i) = 0.5*(S(e) - O)**2;
       d_o = derivate(H, g, b) * dif(i);
       delta_o = eta * d_o * data2;
       d_h = [];
@@ -114,7 +123,7 @@ function learn(S, eta, g, hidden_neurons, len, times, margin, b)
       % delta_o
       % delta_h
       Wo += delta_o;
-      Wh += delta_h; 
+      Wh += delta_h;
     endfor
     %batch
     i=0;
@@ -138,12 +147,12 @@ function learn(S, eta, g, hidden_neurons, len, times, margin, b)
     j++;
     i+= 0.1;
   end
-  plot(x,y, x, y2);
+  % plot(x,y, x, y2);
   % for i = 1:length(E)
     % disp("RESULTADOS:")
     % e = E(i, :)
     % O = calculate(Wo, [-1 calculate(Wh, [-1 e], g, hidden_neurons)], g, 1)
   % endfor
-  % plot(cuad)
+  plot(cuad)
   toc()
 endfunction
