@@ -59,11 +59,10 @@ function learn(S, eta, func, layers, inLength, times, margin, b, adaptation, cor
             d{l} = (g_prime{l}(H{l}, b) + correction) * dif(t);
             delta{l} = eta * d{l} * data{l};
             k=l-1;
-            while(k>0)
+            for k=l-1:-1:1
                 innerSum = W{k+1}(:, 2:end)' * d{k+1}';
                 d{k} = (correction + g_prime{k}(H{k}, b)) .* innerSum';
                 delta{k} = eta * d{k}' * data{k};
-                k=k-1;
             end
      
             %Control de aumento o disminucion de eta
@@ -96,13 +95,12 @@ function learn(S, eta, func, layers, inLength, times, margin, b, adaptation, cor
             end
         end
         W_old = W;
-  %     batch
+        %     batch
         i=0;
         flag = 0;
         if (margin > 0)
             while (~flag && i < 2*pi)	
                 if(abs(calculate(W{2}, [-1 calculate(W{1}, [-1 i], g{1}, layers(1), b)], g{2}, layers(2), b) - S(i)) > margin)
-        % disp("una vuelta mas");
                     flag = 1;
                 end
                 i = i + 0.1;
