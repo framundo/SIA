@@ -3,7 +3,8 @@
 % S: funcion
 % eta: eta 
 % func: array de funciones de activacion, de arriba para abajo: valores = [1 => sigmoid, 2=> exponential, 3=> identity]
-% len: tamano de la entrada
+% layers: cantidad de neuronas por capa, de abajo hacia arriba
+% inLength: tamano de la entrada
 % times: iteraciones
 % margin: margen de error. Negativo si no se quiere
 % b: beta
@@ -11,15 +12,22 @@
 % adaptation: vector [a b t] de correccion de eta, t es cada cuanto se corrige, a y b los valores. [0 0 0] si no se quiere
 % calc_error: graficar error cuadratico medio
 % momentum: valor entre 0 y 1
-function learn(S, eta, func, hidden_neurons, len, times, margin, b, adaptation, correction, momentum, calc_error)
+function learn(S, eta, func, layers, inLength, times, margin, b, adaptation, correction, momentum, calc_error)
     tic()
-    [g_h, g_h_deriv] = calculateG(func(1));    
-    [g_o, g_o_deriv] = calculateG(func(2)); 
+    l = length(layers);
+    for k =1:l
+        [G, G_prime] = calculateG(func(k));
+        g{k} = G;
+        g_prime{k} = G_prime;
+    end
     cuad=[];
-    Wh = rand(hidden_neurons, len+1);
-    Wo = rand(1, hidden_neurons+1);
-    Wh_old = 0;
-    Wo_old = 0;
+    m = max(layers);
+    W{1} = rand(layers(1), inLength+1);
+    W_old{1} = zeros(layers(1), inLength+1);
+    for k=2:l
+        W{k} = rand(layers(k), layers(k-1)+1);
+        W_old{k} = zeros(layers(k), layers(k-1)+1);
+    end
     flag = 1;
 	consecutive = [0 0];
 	if(adaptation(1)==0 && adaptation(2)==0)
@@ -29,40 +37,43 @@ function learn(S, eta, func, hidden_neurons, len, times, margin, b, adaptation, 
     end
     while (flag)
         for t = 1:times
-      % Error cuadratico medio
+            
+            % Error cuadratico medio
             if(calc_error)
-                cuad(t) = calculateECM(cuad, S, t, Wh, Wo, g_o, g_h, hidden_neurons, b);
+                cuad(t) = calculateECM(cuad, S, t, W, g, layers, b);
             end
-
-      % index = 1 +fix(rand()*length(E));
-      % e = E(index, :);
-      % e = generateBits(len);
             e = rand()*2*pi;
-            data = [-1 e];
-      % Atravesar neurona
-            [hidden_o, hidden_h] = calculate(Wh, data, g_h, hidden_neurons, b);
-            data2 = [-1 hidden_o];
-            [O, H] = calculate(Wo, data2, g_o, 1, b);
-      % Corregir para atr??s
-
-            dif(t) = S(e) - O;
-            d_o = (g_o_deriv(H, b) + correction) * dif(t);
-            delta_o = eta * d_o * data2;
-			d_h = (correction + g_h_deriv(hidden_h, b)) .* (Wo(1, 2:end) .* d_o);
-            delta_h = eta*d_h'*data;
-      % O
-      % H
-      % Wo
-      % Wh
-      % delta_o
-      % delta_h
+            data{1} = [-1 e];
+            
+            % ida
+            for k=1:l
+                [o, h] = calculate(W{k}, data{k}, g{k}, layers(k), b);
+                O{k} = o;
+                H{k} = h;
+                data{k+1} = [-1, O{k}];
+            end
+            
+            % Vuelta
+            
+            dif(t) = S(e) - O{l};
+            d{l} = (g_prime{l}(H{l}, b) + correction) * dif(t);
+            delta{l} = eta * d{l} * data{l};
+            k=l-1;
+            while(k>0)
+                innerSum = W{k+1}(:, 2:end)' * d{k+1}';
+                d{k} = (correction + g_prime{k}(H{k}, b)) .* innerSum';
+                delta{k} = eta * d{k}' * data{k};
+                k=k-1;
+            end
+     
+            %Control de aumento o disminucion de eta
             addDelta = 1;
             if (withAdaptation && t>1)
                 if (dif(t) > dif(t-1))
                     consecutive(2) = consecutive(2)+1;
                     consecutive(1)=0;
-			%disp("eta bajo");
                     if (adaptation(3) == consecutive(2))
+                        %bajo eta
                         consecutive(2) = 0;
                         eta = eta*(1 - adaptation(2));
                         t = t-1;
@@ -71,26 +82,26 @@ function learn(S, eta, func, hidden_neurons, len, times, margin, b, adaptation, 
                 elseif (dif(t) < dif(t-1))
                     consecutive(1) = consecutive(1)+1;
                     consecutive(2)=0;
-			%disp("eta subio");
                     if (adaptation(3) == consecutive(1))
+                        %subo eta
                         consecutive(1) = 0;
                         eta = eta+ adaptation(1);
                     end
                 end
             end
-            if (addDelta)						
-                Wo = Wo + delta_o + momentum*Wo_old;
-                Wh = Wh + delta_h + momentum*Wh_old;
+            if (addDelta)
+                for k=1:l
+                   W{k} = W{k} + delta{k} + momentum * W_old{k};
+                end
             end
         end
-        Wo_old = Wo;
-        Wh_old = Wh;
-  %batch
+        W_old = W;
+  %     batch
         i=0;
         flag = 0;
         if (margin > 0)
             while (~flag && i < 2*pi)	
-                if(abs(calculate(Wo, [-1 calculate(Wh, [-1 i], g_o, hidden_neurons, b)], g_h, 1, b) - S(i)) > margin)
+                if(abs(calculate(W{2}, [-1 calculate(W{1}, [-1 i], g{1}, layers(1), b)], g{2}, layers(2), b) - S(i)) > margin)
         % disp("una vuelta mas");
                     flag = 1;
                 end
@@ -101,7 +112,11 @@ function learn(S, eta, func, hidden_neurons, len, times, margin, b, adaptation, 
     i =0;
     j=1;
     while (i < 2*pi)
-        y(j) = calculate(Wo, [-1 calculate(Wh, [-1 i], g_o, hidden_neurons, b)], g_h, 1, b);
+        if (l==2)
+            y(j) = calculate(W{2}, [-1 calculate(W{1}, [-1 i], g{1}, layers(1), b)], g{2}, layers(2), b);
+        elseif (l==3)
+            y(j) = calculate(W{3}, [-1 calculate(W{2}, [-1 calculate(W{1}, [-1 i], g{1}, layers(1), b)], g{2}, layers(2), b)], g{3}, layers(3), b);
+        end
         y2(j) = S(i);
         x(j)=i;
         j = j + 1;
@@ -119,11 +134,6 @@ function learn(S, eta, func, hidden_neurons, len, times, margin, b, adaptation, 
         plot(cuad);
     end
     toc()
-end
-
-function [E, S] = init()
-  E = [-1 -1 ; -1 1; 1 -1; 1 1];
-  S = [-1 1 1 -1]';
 end
 
 function [o, h] = calculate(W, data, g, neurons, b)
@@ -175,11 +185,17 @@ function [g, g_d] = calculateG(val)
     end
 end
 
-function out = calculateECM(cuad, S, t, Wh, Wo, g_o, g_h, hidden_neurons, b)
+%soportado para 2 y 3 capas
+function out = calculateECM(cuad, S, t, W, g, layers, b)
     cuad(t) = 0;
     p = -1;
+    l = length(layers);
     while (p < 1)
-        pattern_o = calculate(Wo, [-1 calculate(Wh, [-1 p], g_o, hidden_neurons, b)], g_h, 1, b);
+        if (l==2)
+            pattern_o = calculate(W{2}, [-1 calculate(W{1}, [-1 p], g{1}, layers(1), b)], g{2}, layers(2), b);
+        elseif (l==3)
+            pattern_o = calculate(W{3}, [-1 calculate(W{2}, [-1 calculate(W{1}, [-1 p], g{1}, layers(1), b)], g{2}, layers(2), b)], g{3}, layers(3), b);
+        end
         pattern_s = S(p);
         cuad(t) = cuad(t) + (pattern_s-pattern_o)^2;
         p = p + 0.1;
