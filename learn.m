@@ -11,11 +11,11 @@
 % adaptation: vector [a b t] de correccion de eta, t es cada cuanto se corrige, a y b los valores. [0 0 0] si no se quiere
 % calc_error: graficar error cuadratico medio
 % momentum: valor entre 0 y 1
-function learn(S, eta, func, hidden_neurons, len, times, margin, b, adaptation, correction, momentum,calc_error)
+function learn(S, eta, func, hidden_neurons, len, times, margin, b, adaptation, correction, momentum, calc_error)
     tic()
     [g_h, g_h_deriv] = calculateG(func(1));    
     [g_o, g_o_deriv] = calculateG(func(2)); 
-
+    cuad=[];
     Wh = rand(hidden_neurons, len+1);
     Wo = rand(1, hidden_neurons+1);
     Wh_old = 0;
@@ -31,15 +31,7 @@ function learn(S, eta, func, hidden_neurons, len, times, margin, b, adaptation, 
         for t = 1:times
       % Error cuadratico medio
             if(calc_error)
-                cuad(t) = 0;
-                p = -1;
-                while (p < 1)
-                    pattern_o = calculate(Wo, [-1 calculate(Wh, [-1 p], g_o, hidden_neurons, b)], g_h, 1, b);
-                    pattern_s = S(p);
-                    cuad(t) = cuad(t) + (pattern_s-pattern_o)^2;
-                    p = p + 0.1;
-                end
-                cuad(t) = cuad(t)/(1/0.1);
+                cuad(t) = calculateECM(cuad, S, t, Wh, Wo, g_o, g_h, hidden_neurons, b);
             end
 
       % index = 1 +fix(rand()*length(E));
@@ -181,4 +173,17 @@ function [g, g_d] = calculateG(val)
         g = @identity;
         g_d = @identity_derivated;
     end
+end
+
+function out = calculateECM(cuad, S, t, Wh, Wo, g_o, g_h, hidden_neurons, b)
+    cuad(t) = 0;
+    p = -1;
+    while (p < 1)
+        pattern_o = calculate(Wo, [-1 calculate(Wh, [-1 p], g_o, hidden_neurons, b)], g_h, 1, b);
+        pattern_s = S(p);
+        cuad(t) = cuad(t) + (pattern_s-pattern_o)^2;
+        p = p + 0.1;
+    end
+    cuad(t) = cuad(t)/(1/0.1);
+    out = cuad(t);
 end
