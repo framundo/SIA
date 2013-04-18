@@ -16,18 +16,21 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
     tic()
     limit = 500;
     l = length(layers);
-    S = S./4;
+    S = S./max(S);
+    W = cell(l);
+    W_old = cell(l);
+    g = cell(l);
+    g_prime = cell(l);
+    
     for k =1:l
         [G, G_prime] = calculateG(func(k));
         g{k} = G;
         g_prime{k} = G_prime;
     end
-    cuad=[];
-    m = max(layers);
-    W{1} = rand(layers(1), inLength+1);
+    W{1} = ((rand(layers(1), inLength+1))-0.5)/5;
     W_old{1} = zeros(layers(1), inLength+1);
     for k=2:l
-        W{k} = rand(layers(k), layers(k-1)+1);
+        W{k} = ((rand(layers(k), layers(k-1)+1))-0.5)/5;
         W_old{k} = zeros(layers(k), layers(k-1)+1);
     end
     flag = 1;
@@ -37,12 +40,23 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
 	else
 		withAdaptation = 1;
     end
+    
+    cuad = zeros(1,times/limit);
+    cuadindex=1;
+    dif = zeros(1, times);
+    O = cell(l);
+    H = cell(l);
+    data = cell(l+1);
+    d = cell(l);
+    delta = cell(l);
+    
     while (flag)
         for t = 1:times
             
             % Error cuadratico medio
-            if(calc_error)
-                cuad(t) = calculateECM(cuad, S, t, W, g, layers, b, inLength, limit, 1);
+            if(calc_error && rem(t, limit) == 0)
+                cuad(cuadindex) = calculateECM(cuad, S, t, W, g, layers, b, inLength, limit, 0);
+                cuadindex = cuadindex+1;
             end
 %             e = rand()*2*pi;
             x = fix(rand()*limit)+inLength+1;
@@ -65,7 +79,6 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
             dif(t) = S(x) - O{l};
             d{l} = (g_prime{l}(H{l}, b) + correction) * dif(t);
             delta{l} = eta * d{l} * data{l};
-            k=l-1;
             for k=l-1:-1:1
                 innerSum = W{k+1}(:, 2:end)' * d{k+1}';
                 d{k} = (correction + g_prime{k}(H{k}, b)) .* innerSum';
@@ -120,9 +133,9 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
     end
     i =inLength+1;
     j=1;
-    
+    y = zeros(1, 2*limit - (inLength+1));
+    y2 = zeros(1, 2*limit - (inLength+1));
     while (i < 2*limit)
-        initialData = [];
         y(j)=calculateRecursive(S, W, g, inLength, l, layers, b, i);
         y2(j) = S(i);
         x(j)=i;
@@ -131,13 +144,15 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
     end
     figure(1);
     plot(x,y, x, y2);
+    figure(2);
+    plot(y,y2, '.');
   % for i = 1:length(E)
     % disp("RESULTADOS:")
     % e = E(i, :)
     % O = calculate(Wo, [-1 calculate(Wh, [-1 e], g, hidden_neurons)], g, 1)
   % endfor
     if(calc_error)
-        figure(2);
+        figure(3);
         plot(cuad);
     end
     toc()
@@ -200,7 +215,7 @@ function out = calculateECM(cuad, S, t, W, g, layers, b, inLength, limit, printI
         cuad(t) = cuad(t) + (pattern_s-pattern_o)^2;
         p = p + 1;
     end
-    cuad(t) = cuad(t)/(1/0.1);
+    cuad(t) = cuad(t)/(limit-(inLength+1));
     out = cuad(t);
     if(printIt)
         figure(2);
