@@ -57,7 +57,11 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
             % Error cuadratico medio
             if(calc_error && rem(t, limit) == 0)
                 cuad(cuadindex) = calculateECM(cuad, S, t, W, g, layers, b, inLength, limit, 0);
+                if (cuad(cuadindex) <margin)
+                    break;
+                end
                 cuadindex = cuadindex+1;
+                
             end
 %             e = rand()*2*pi;
             x = fix(rand()*limit)+inLength+1;
@@ -98,7 +102,7 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
                         eta = eta*(1 - adaptation(2));
                         etaPlot(etaIndex)=eta;
                         etaIndex = etaIndex+1;
-                        t = t-1;
+                        t = t-consecutive(3);
                         addDelta = 0;
                     end
                 elseif (dif(t) < dif(t-1))
@@ -124,17 +128,16 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
             end
         end
         W_old = W;
-        %     batch
-        i=0;
+%         i=0;
         flag = 0;
-        if (margin > 0)
-            while (~flag && i < limit)	
-                if(abs(calculate(W{2}, [-1 calculate(W{1}, [-1 i], g{1}, layers(1), b)], g{2}, layers(2), b) - S(i)) > margin)
-                    flag = 1;
-                end
-                i = i + 1;
-            end
-        end
+%         if (margin > 0)
+%             while (~flag && i < limit)	
+%                 if(abs(calculate(W{2}, [-1 calculate(W{1}, [-1 i], g{1}, layers(1), b)], g{2}, layers(2), b) - S(i)) > margin)
+%                     flag = 1;
+%                 end
+%                 i = i + 1;
+%             end
+%         end
     end
     i =inLength+1;
     y = zeros(1, limit - (inLength+1));
