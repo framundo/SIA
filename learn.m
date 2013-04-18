@@ -12,25 +12,26 @@
 % adaptation: vector [a b t] de correccion de eta, t es cada cuanto se corrige, a y b los valores. [0 0 0] si no se quiere
 % calc_error: graficar error cuadratico medio
 % momentum: valor entre 0 y 1
-function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation, correction, momentum, calc_error)
+function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation, correction, momentum, calc_error, limit, limitMult)
     tic()
-    limit = 500;
     l = length(layers);
     S = S./max(S);
-    W = cell(l);
-    W_old = cell(l);
-    g = cell(l);
-    g_prime = cell(l);
-    
+    W = cell(1,l);
+    W_old = cell(1,l);
+    g = cell(1,l);
+    g_prime = cell(1,l);
+    etaPlot = [];
+    etaPlot(1) = eta;
+    etaIndex=2;
     for k =1:l
         [G, G_prime] = calculateG(func(k));
         g{k} = G;
         g_prime{k} = G_prime;
     end
-    W{1} = ((rand(layers(1), inLength+1))-0.5)/5;
+    W{1} = ((rand(layers(1), inLength+1))-0.5)/2;
     W_old{1} = zeros(layers(1), inLength+1);
     for k=2:l
-        W{k} = ((rand(layers(k), layers(k-1)+1))-0.5)/5;
+        W{k} = ((rand(layers(k), layers(k-1)+1))-0.5)/2;
         W_old{k} = zeros(layers(k), layers(k-1)+1);
     end
     flag = 1;
@@ -41,7 +42,7 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
 		withAdaptation = 1;
     end
     
-    cuad = zeros(1,times/limit);
+    cuad = zeros(1, fix(times/limit));
     cuadindex=1;
     dif = zeros(1, times);
     O = cell(l);
@@ -95,6 +96,8 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
                         %bajo eta
                         consecutive(2) = 0;
                         eta = eta*(1 - adaptation(2));
+                        etaPlot(etaIndex)=eta;
+                        etaIndex = etaIndex+1;
                         t = t-1;
                         addDelta = 0;
                     end
@@ -108,6 +111,8 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
                         %subo eta
                         consecutive(1) = 0;
                         eta = eta+ adaptation(1);
+                        etaPlot(etaIndex)=eta;
+                        etaIndex = etaIndex+1;
                         W = previous_W;
                     end
                 end
@@ -132,20 +137,31 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
         end
     end
     i =inLength+1;
-    j=1;
-    y = zeros(1, 2*limit - (inLength+1));
-    y2 = zeros(1, 2*limit - (inLength+1));
-    while (i < 2*limit)
-        y(j)=calculateRecursive(S, W, g, inLength, l, layers, b, i);
-        y2(j) = S(i);
-        x(j)=i;
-        j = j + 1;
+    y = zeros(1, limit - (inLength+1));
+    y2 = zeros(1, limit - (inLength+1));
+    if (limitMult ~= 1)
+        z = zeros(1, limit - (inLength+1));
+        z2 = zeros(1, limit - (inLength+1));
+    else
+       z =[];
+       z2 = [];
+    end
+    while (i < limit)
+        y(i)=calculateRecursive(S, W, g, inLength, l, layers, b, i);
+        y2(i) = S(i);
+        x(i)=i;
+        i = i + 1;
+    end
+    while (i < limitMult*limit)
+        z(i-limit+1)=calculateRecursive(S, W, g, inLength, l, layers, b, i);
+        z2(i-limit+1) = S(i);
+        x(i)=i;
         i = i + 1;
     end
     figure(1);
-    plot(x,y, x, y2);
+    plot(x,[y z], x, [y2 z2]);
     figure(2);
-    plot(y,y2, '.');
+    plot(y,y2, '.',z,z2,'x');
   % for i = 1:length(E)
     % disp("RESULTADOS:")
     % e = E(i, :)
@@ -155,6 +171,8 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
         figure(3);
         plot(cuad);
     end
+    figure(4);
+    plot(etaPlot);
     toc()
     ecm = calculateECM(cuad, S, t, W, g, layers, b, inLength, limit, 0)
 
@@ -209,7 +227,6 @@ function out = calculateECM(cuad, S, t, W, g, layers, b, inLength, limit, printI
     p = inLength+1;
     l = length(layers);
     while (p < limit)
-        initialData=[];
         pattern_o = calculateRecursive(S, W, g, inLength, l, layers, b, p);
         pattern_s = S(p);
         cuad(t) = cuad(t) + (pattern_s-pattern_o)^2;
