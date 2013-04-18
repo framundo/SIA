@@ -12,6 +12,10 @@
 % adaptation: vector [a b t] de correccion de eta, t es cada cuanto se corrige, a y b los valores. [0 0 0] si no se quiere
 % calc_error: graficar error cuadratico medio
 % momentum: valor entre 0 y 1
+% limit: la cantidad limite de entradas iniciales de la serie a aprender
+% limitMult: El valor a multiplicar el limite para probar si se aprendio o
+%   no (Si lmit es 500 y limitMult es 2, va a aprender los 500 primeros
+%   valores y va a generalizar los otros 500 (va a probalo con 1000 = 2*500)
 function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation, correction, momentum, calc_error, limit, limitMult)
     tic()
     l = length(layers);
