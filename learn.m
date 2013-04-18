@@ -176,7 +176,8 @@ function [g, g_d] = calculateG(val)
         g = @sigmoid;
         g_d = @sigmoid_derivated;
     elseif (val == 2) %exp
-        
+        g = @exp;
+        g_d = @exp_derivated;
     elseif (val == 3) %linear
         g = @identity;
         g_d = @identity_derivated;
