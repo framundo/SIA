@@ -9,7 +9,7 @@
 % margin: margen de error. Negativo si no se quiere
 % b: beta
 % correction: valor de correccion de la derivada de g. Sugerido 0.1.
-% adaptation: vector [a b t] de correccion de eta, t es cada cuanto se corrige, a y b los valores. [0 0 0] si no se quiere
+% adaptation: vector [a b t1 t2] de correccion de eta, t1 y t2 son cada cuanto se corrige cada uno, a y b los valores. [0 0 X X] si no se quiere
 % calc_error: graficar error cuadratico medio
 % momentum: valor entre 0 y 1
 % limit: la cantidad limite de entradas iniciales de la serie a aprender
@@ -27,12 +27,13 @@ function W = learn3Capas(S, eta, func, layers, inLength, times, margin, b, adapt
     g{2} = @sigmoid;
     g{3} = @sigmoid;
     W1 = ((rand(layers(1), inLength+1))-0.5)/5;
-    W1_old = zeros(layers(1), inLength+1);
         W2 = ((rand(layers(2), layers(1)+1))-0.5)/5;
-        W2_old = zeros(layers(2), layers(1)+1);
         W3 = ((rand(layers(3), layers(2)+1))-0.5)/5;
-        W3_old = zeros(layers(3), layers(2)+1);
        
+        delta1 = zeros(layers(1), inLength+1);
+         delta2 = zeros(layers(2), layers(1)+1);
+         delta3 = zeros(layers(3), layers(2)+1);
+         
 	consecutive = [0 0];
 	if(adaptation(1)==0 && adaptation(2)==0)
 		withAdaptation = 0;
@@ -51,7 +52,7 @@ function W = learn3Capas(S, eta, func, layers, inLength, times, margin, b, adapt
             W{1} = W1;
             W{2} = W2;
             W{3} = W3;
-            cuad(cuadindex) = calculateECM(cuad, S, t, W, g, layers, b, inLength, limit, 0);
+            cuad(cuadindex) = calculateECM(cuad, S, t, W, g, layers, b, inLength, limitMult*limit, 0);
             if (cuad(cuadindex) <margin)
                 break;
             end
@@ -75,6 +76,9 @@ function W = learn3Capas(S, eta, func, layers, inLength, times, margin, b, adapt
         
         
         % Vuelta
+        delta1_old = delta1;
+        delta2_old = delta2;
+        delta3_old = delta3;
         
         dif(t) = S(x) - o3;
         d3 = (sigmoid_derivated(h3, b) + correction) * dif(t);
@@ -86,38 +90,36 @@ function W = learn3Capas(S, eta, func, layers, inLength, times, margin, b, adapt
             innerSum = W2(:, 2:end)' * d2';
             d1 = (correction + sigmoid_derivated(h1, b)) .* innerSum';
             delta1 = eta * d1' * data1;
-        
-
+                
         %Control de aumento o disminucion de eta
         addDelta = 1;
         if (withAdaptation && t>1)
-            if (dif(t) > dif(t-1))
-                consecutive(2) = consecutive(2)+1;
-                consecutive(1)=0;
-                if (adaptation(3) == consecutive(2))
-                    %bajo eta
-                    consecutive(2) = 0;
-                    eta = eta*(1 - adaptation(2));
-                    etaPlot(etaIndex)=eta;
-                    etaIndex = etaIndex+1;
-                    t = t-adaptation(3);
-                    addDelta = 0;
-                end
-            elseif (dif(t) < dif(t-1))
-                if (consecutive(1) == 0)
-                     previous_W1 = W1;
-                     previous_W2 = W2;
-                     previous_W3 = W3;
-
-                end
+            if (dif(t) < dif(t-1))
                 consecutive(1) = consecutive(1)+1;
                 consecutive(2)=0;
                 if (adaptation(3) == consecutive(1))
                     %subo eta
                     consecutive(1) = 0;
-                    eta = eta+ adaptation(1);
+                    eta = eta + adaptation(1);
                     etaPlot(etaIndex)=eta;
                     etaIndex = etaIndex+1;
+                end
+            elseif (dif(t) > dif(t-1))
+                if (consecutive(2) == 0)
+                     previous_W1 = W1;
+                     previous_W2 = W2;
+                     previous_W3 = W3;
+                end
+                consecutive(2) = consecutive(2)+1;
+                consecutive(1)=0;
+                if (adaptation(4) == consecutive(2))
+                    %bajo eta
+                    consecutive(2) = 0;
+                    eta = eta*(1 - adaptation(2));
+                    etaPlot(etaIndex)=eta;
+                    etaIndex = etaIndex+1;
+                    t = t-adaptation(4);
+                    addDelta = 0;
                     W1 = previous_W1;
                     W2 = previous_W2;
                     W3 = previous_W3;
@@ -125,13 +127,11 @@ function W = learn3Capas(S, eta, func, layers, inLength, times, margin, b, adapt
             end
         end
         if (addDelta)
-               W1 = W1 + delta1 + momentum * W1_old;
-               W2 = W2 + delta2 + momentum * W2_old;
-               W3 = W3 + delta3 + momentum * W3_old;
+           
+               W1 = W1 + delta1 + momentum * delta1_old;
+               W2 = W2 + delta2 + momentum * delta2_old;
+               W3 = W3 + delta3 + momentum * delta3_old;
         end
-        W1_old = W1;
-        W2_old = W2;
-        W3_old = W3;
     end
     W{1} = W1;
     W{2} = W2;
@@ -148,13 +148,13 @@ function W = learn3Capas(S, eta, func, layers, inLength, times, margin, b, adapt
        z2 = [];
     end
     while (i < limit)
-        y(i)=calculateRecursive(S, W, g, inLength, l, layers, b, i);
+        y(i)=calculateRecursive(S, W, g, inLength, layers, b, i);
         y2(i) = S(i);
         x(i)=i;
         i = i + 1;
     end
     while (i < limitMult*limit)
-        z(i-limit+1)=calculateRecursive(S, W, g, inLength, l, layers, b, i);
+        z(i-limit+1)=calculateRecursive(S, W, g, inLength, layers, b, i);
         z2(i-limit+1) = S(i);
         x(i)=i;
         i = i + 1;
@@ -177,36 +177,5 @@ function W = learn3Capas(S, eta, func, layers, inLength, times, margin, b, adapt
         plot(etaPlot);
     end
     toc()
-    ecm = calculateECM(cuad, S, t, W, g, layers, b, inLength, limit, 0)
-
-end
-
-function [g, g_d] = calculateG(val)
-    if (val == 1) %sigmoid
-        g = @sigmoid;
-        g_d = @sigmoid_derivated;
-    elseif (val == 2) %exp
-        
-    elseif (val == 3) %linear
-        g = @identity;
-        g_d = @identity_derivated;
-    end
-end
-
-function out = calculateECM(cuad, S, t, W, g, layers, b, inLength, limit, printIt)
-    cuad(t) = 0;
-    p = inLength+1;
-    l = length(layers);
-    while (p < limit)
-        pattern_o = calculateRecursive(S, W, g, inLength, l, layers, b, p);
-        pattern_s = S(p);
-        cuad(t) = cuad(t) + (pattern_s-pattern_o)^2;
-        p = p + 1;
-    end
-    cuad(t) = cuad(t)/(limit-(inLength+1));
-    out = cuad(t);
-    if(printIt)
-        figure(2);
-        plot(cuad);
-    end
+    ecm = calculateECM(cuad, S, t, W, g, layers, b, inLength, limitMult*limit, 0)
 end
