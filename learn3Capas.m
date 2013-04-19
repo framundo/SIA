@@ -26,11 +26,11 @@ function W = learn3Capas(S, eta, func, layers, inLength, times, margin, b, adapt
     g{1} = @sigmoid;
     g{2} = @sigmoid;
     g{3} = @sigmoid;
-    W1 = ((rand(layers(1), inLength+1))-0.5)/2;
+    W1 = ((rand(layers(1), inLength+1))-0.5)/5;
     W1_old = zeros(layers(1), inLength+1);
-        W2 = ((rand(layers(2), layers(1)+1))-0.5)/2;
+        W2 = ((rand(layers(2), layers(1)+1))-0.5)/5;
         W2_old = zeros(layers(2), layers(1)+1);
-        W3 = ((rand(layers(3), layers(2)+1))-0.5)/2;
+        W3 = ((rand(layers(3), layers(2)+1))-0.5)/5;
         W3_old = zeros(layers(3), layers(2)+1);
        
     flag = 1;
@@ -188,8 +188,10 @@ function W = learn3Capas(S, eta, func, layers, inLength, times, margin, b, adapt
         figure(3);
         plot(cuad);
     end
-    figure(4);
-    plot(etaPlot);
+    if(length(etaPlot) >1)
+        figure(4);
+        plot(etaPlot);
+    end
     toc()
     ecm = calculateECM(cuad, S, t, W, g, layers, b, inLength, limit, 0)
 
