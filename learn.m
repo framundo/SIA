@@ -185,32 +185,4 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
 
 end
 
-function [g, g_d] = calculateG(val)
-    if (val == 1) %sigmoid
-        g = @sigmoid;
-        g_d = @sigmoid_derivated;
-    elseif (val == 2) %exp
-        
-    elseif (val == 3) %linear
-        g = @identity;
-        g_d = @identity_derivated;
-    end
-end
 
-function out = calculateECM(cuad, S, t, W, g, layers, b, inLength, limit, printIt)
-    cuad(t) = 0;
-    p = inLength+1;
-    l = length(layers);
-    while (p < limit)
-        pattern_o = calculateRecursive(S, W, g, inLength, l, layers, b, p);
-        pattern_s = S(p);
-        cuad(t) = cuad(t) + (pattern_s-pattern_o)^2;
-        p = p + 1;
-    end
-    cuad(t) = cuad(t)/(limit-(inLength+1));
-    out = cuad(t);
-    if(printIt)
-        figure(2);
-        plot(cuad);
-    end
-end
