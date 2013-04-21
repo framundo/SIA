@@ -179,7 +179,7 @@ function W = learn3Capas(S, eta, func, layers, inLength, times, margin, b, adapt
     if(length(etaPlot) >1)
         subplot(2,2,3), plot(etaPlot);
         ylabel('eta', 'interpreter', 'latex');
-        xlabel('\''epocas', 'interpreter', 'latex');
+        xlabel('tiempo', 'interpreter', 'latex');
         title('Evoluci\''on de eta', 'interpreter', 'latex');
     end
     subplot(2,2,4), plot(dif);
