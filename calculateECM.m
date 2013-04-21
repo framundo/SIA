@@ -4,8 +4,7 @@ function out = calculateECM(cuad, S, t, W, g, layers, b, inLength, limit, printI
     p = inLength+1;
     l = length(layers);
     while (p < limit)
-        initialData=[];
-        pattern_o = calculateRecursive(S, W, g, inLength, l, layers, b, p);
+        pattern_o = calculateRecursive(S, W, g, inLength, layers, b, p);
         pattern_s = S(p);
         cuad(t) = cuad(t) + (pattern_s-pattern_o)^2;
         p = p + 1;
