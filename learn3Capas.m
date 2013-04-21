@@ -159,23 +159,34 @@ function W = learn3Capas(S, eta, func, layers, inLength, times, margin, b, adapt
         x(i)=i;
         i = i + 1;
     end
-%     figure(1);
-%     plot(x,[y z], x, [y2 z2]);
-    figure(2);
-    plot(y,y2, '.',z,z2,'x');
-  % for i = 1:length(E)
-    % disp("RESULTADOS:")
-    % e = E(i, :)
-    % O = calculate(Wo, [-1 calculate(Wh, [-1 e], g, hidden_neurons)], g, 1)
-  % endfor
+%     subplot(2,2,1), plot(x,[y z], 'x', x, [y2 z2]);
+%     xlabel('tiempo', 'interpreter', 'latex');
+%     ylabel('S(t)', 'interpreter', 'latex');
+%     title('Series', 'interpreter', 'latex');
+%     legend('serie aproximada', 'serie real');
+
+    subplot(2,2,1), plot(y,y2, 'o',z,z2,'x');
+    xlabel('S(t)', 'interpreter', 'latex');
+    ylabel('$\hat{S}(t)$', 'interpreter', 'latex');
+    title('Serie real sobre serie aproximada', 'interpreter', 'latex');
+    legend('patrones de entrenamiento', 'patrones de prueba');
     if(calc_error)
-        figure(3);
-        plot(cuad);
+        subplot(2,2,2), plot(cuad);
+        xlabel('\''epocas', 'interpreter', 'latex');
+        ylabel('E(t)', 'interpreter', 'latex');
+        title('Error cuadr\''atico medio', 'interpreter', 'latex');
     end
     if(length(etaPlot) >1)
-        figure(4);
-        plot(etaPlot);
+        subplot(2,2,3), plot(etaPlot);
+        ylabel('eta', 'interpreter', 'latex');
+        xlabel('\''epocas', 'interpreter', 'latex');
+        title('Evoluci\''on de eta', 'interpreter', 'latex');
     end
+    subplot(2,2,4), plot(dif);
+    ylabel('S - O', 'interpreter', 'latex');
+    xlabel('\''iteraciones', 'interpreter', 'latex');
+    title('Error en la salida', 'interpreter', 'latex');
+    
     toc()
     ecm = calculateECM(cuad, S, t, W, g, layers, b, inLength, limitMult*limit, 0)
 end
