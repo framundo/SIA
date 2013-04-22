@@ -41,10 +41,10 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
         g{k} = G;
         g_prime{k} = G_prime;
     end
-    W{1} = ((rand(layers(1), inLength+1))-0.5)/5;
+    W{1} = ((rand(layers(1), inLength+1))-0.5);
     delta{1} = zeros(layers(1), inLength+1);
     for k=2:l
-        W{k} = ((rand(layers(k), layers(k-1)+1))-0.5)/5;
+        W{k} = ((rand(layers(k), layers(k-1)+1))-0.5);
         delta{k} = zeros(layers(k), layers(k-1)+1);
     end
 	consecutive = [0 0];
