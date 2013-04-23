@@ -63,6 +63,7 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
         % Error cuadratico medio
         if(calc_error && rem(t, limit) == 0)
             cuad(cuadindex) = calculateECM(cuad, S, t, W, g, layers, b, inLength, limitMult*limit, 0);
+            plot(cuad)
             if (cuad(cuadindex) < margin)
                 break;
             end
