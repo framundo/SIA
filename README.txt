@@ -18,3 +18,6 @@ donde cada par‡metro significa:
 - test: numero entero que se multiplica por 'traen' para obtener la cantidad de patrones de prueba
   (Si lmit es 500 y limitMult es 2, va a aprender los 500 primeros
   valores y va a generalizar los otros 500 (va a probalo con 1000 = 2*500)
+
+
+Es necesario cargar los datos de prueba => load("TimeSerie_G5.mat")
