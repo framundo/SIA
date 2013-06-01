@@ -39,7 +39,9 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
     g{3} = @sigmoid;
     fitPlot = [];
     meanFitPlot = [];
-    for gen=1:maxGen
+    gen = 1;
+    while ~cut
+        T = 100/gen;
         if (mod(gen, genP) == 0)
             mutP = mutP * c;
         end
@@ -50,16 +52,16 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
         if (replacement == 1)
             %metodo 1
             for n=1:N/2
-                 selected = selectionCrit(fitness, 2);
+                 selected = selectionCrit(fitness, 2, T);
                  [newPopul{2*n}, newPopul{2*n-1}] = cross(crossP, mutP, backP, popul{selected(1)}, popul{selected(2)}, layers, times, S);
             end
         elseif (replacement == 2)
             %metodo 2
-            selected = selectionCrit(fitness, K);
+            selected = selectionCrit(fitness, K, T);
             for n=1:K/2
                 [newPopul{2*n}, newPopul{2*n-1}] = cross(crossP, mutP, backP, popul{selected(2*n)}, popul{selected(2*n-1)}, layers, times, S);
             end
-            selectedOriginal = selectionCrit2(fitness, N-K);
+            selectedOriginal = selectionCrit2(fitness, N-K, T);
             i = 1;
             for n=(K+1):N
                 newPopul{n} = popul{selectedOriginal(i)};
@@ -67,7 +69,7 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
             end
         elseif (replacement == 3)
             %metodo 3
-            selected = selectionCrit(fitness, K);
+            selected = selectionCrit(fitness, K, T);
             childs = cell(1, K);
             interPopul = cell(1, K+N);
             for n=1:K/2
@@ -81,7 +83,7 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
                 interPopul{n} = popul{n-K};
             end
             interFitness = [childsFitness fitness];
-            selected = selectionCrit(interFitness, N);
+            selected = selectionCrit(interFitness, N, T);
             for n=1:N
                 newPopul{n} = interPopul{selected(n)};
             end
@@ -91,6 +93,8 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
         figure(2);
         plot(meanFitPlot);
         popul = newPopul;
+    	gen=gen+1;
+        cut = gen > maxGen || fitPlot(gen) < err;
     end
     
         subplot(2,1,1)
