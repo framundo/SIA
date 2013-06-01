@@ -1,4 +1,4 @@
-function boltzman = boltzman(fitness, K, T, generation)
+function boltzman = boltzman(fitness, K, T)
 	acum = 0;
 	count = 0;
 	for i=1:length(fitness)
@@ -7,7 +7,7 @@ function boltzman = boltzman(fitness, K, T, generation)
 	end
 	avg = acum/count;
 	for i=1:length(fitness)
-		fitness(i) = exp(fitness(i)/T(generation))/(exp(acum/T(generation))); %probar el T para que en el primer paso queden todos parecidos y vayan agrandandose las diferencias 
+		fitness(i) = exp(fitness(i)/T)/(exp(acum/T)); %probar el T para que en el primer paso queden todos parecidos y vayan agrandandose las diferencias 
 	end
 	boltzman = roulette(fitness, K);
 end
