@@ -46,27 +46,27 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
     
     W = backpropagation(S, W, g, g_prime, eta, delta, etaPlot, layers, b, inLength, margin, adaptation, correction, momentum, calc_error, limit, limitMult, cuad, times);
 
-    subplot(2,2,1), plot(y,y2, 'o',z,z2,'x');
-    xlabel('S(t)', 'interpreter', 'latex');
-    ylabel('$\hat{S}(t)$', 'interpreter', 'latex');
-    title('Serie real sobre serie aproximada', 'interpreter', 'latex');
-    legend('patrones de entrenamiento', 'patrones de prueba');
-    if(calc_error)
-        subplot(2,2,2), plot(cuad);
-        xlabel('\''epocas', 'interpreter', 'latex');
-        ylabel('E(t)', 'interpreter', 'latex');
-        title('Error cuadr\''atico medio', 'interpreter', 'latex');
-    end
-    if(length(etaPlot) >1)
-        subplot(2,2,3), plot(etaPlot);
-        ylabel('eta', 'interpreter', 'latex');
-        xlabel('tiempo', 'interpreter', 'latex');
-        title('Evoluci\''on de eta', 'interpreter', 'latex');
-    end
-    subplot(2,2,4), plot(dif);
-    ylabel('S - O', 'interpreter', 'latex');
-    xlabel('\''iteraciones', 'interpreter', 'latex');
-    title('Error en la salida', 'interpreter', 'latex');
+%     subplot(2,2,1), plot(y,y2, 'o',z,z2,'x');
+%     xlabel('S(t)', 'interpreter', 'latex');
+%     ylabel('$\hat{S}(t)$', 'interpreter', 'latex');
+%     title('Serie real sobre serie aproximada', 'interpreter', 'latex');
+%     legend('patrones de entrenamiento', 'patrones de prueba');
+%     if(calc_error)
+%         subplot(2,2,2), plot(cuad);
+%         xlabel('\''epocas', 'interpreter', 'latex');
+%         ylabel('E(t)', 'interpreter', 'latex');
+%         title('Error cuadr\''atico medio', 'interpreter', 'latex');
+%     end
+%     if(length(etaPlot) >1)
+%         subplot(2,2,3), plot(etaPlot);
+%         ylabel('eta', 'interpreter', 'latex');
+%         xlabel('tiempo', 'interpreter', 'latex');
+%         title('Evoluci\''on de eta', 'interpreter', 'latex');
+%     end
+%     subplot(2,2,4), plot(dif);
+%     ylabel('S - O', 'interpreter', 'latex');
+%     xlabel('\''iteraciones', 'interpreter', 'latex');
+%     title('Error en la salida', 'interpreter', 'latex');
     
     toc()
     ecm = calculateECM(cuad, S, t, W, g, layers, b, inLength, limitMult*limit, 0)

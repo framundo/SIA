@@ -6,6 +6,7 @@ end
 function o = innerBack(backP, gen, layers, times, S)
     o = gen;
     if (rand() < backP)
+        disp('backP!')
         g = cell(1,3);
         eta = 0.3;
         g{1} = @sigmoid;
@@ -21,7 +22,7 @@ function o = innerBack(backP, gen, layers, times, S)
         end
         etaPlot = zeros(1, times);
         cuad = zeros(1, times);
-        w = backpropagation(S, arrayToLayers(gen, layers), g, g_d, eta, delta, etaPlot, layers(2:length(layers)), 1, layers(1), -10e-4, [0.01 0.1 6 6], 0.1, 0.1, 0, 998, 1, cuad, times);
+        w = backpropagation(S, arrayToLayers(gen, layers), g, g_d, eta, delta, etaPlot, layers(2:length(layers)), 1, layers(1), -10e-4, [0.01 0.1 6 6], 0.1, 0.1, 0, length(S)-2, 1, cuad, times);
         o = layersToArray(w, layers);
     end
 end

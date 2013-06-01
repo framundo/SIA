@@ -5,7 +5,7 @@ end
 
 function gen = innerMutate(mutP, gen)
     if (rand() < mutP)
-        puts 'mute!'
+        disp('mutate!')
         n = fix(rand()*length(gen) +1);
         gen(n) = rand() - 0.5;
     end

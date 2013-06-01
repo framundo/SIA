@@ -12,6 +12,7 @@
 %   back = parametros de backpropagation[backP times]
 %       backP = probabilidad de hacer backpropagation
 %       times = cantidad de iteraciones
+%   crossP = probabilidad de cruce
 %   selectionCrits = criterios de seleccion, en forma de array donde cada numero representa:
 %       1 = elitismo
 %       2 = ruleta
@@ -21,7 +22,7 @@
 %       6 = elite-boltzman
 %   cross = funcion de cruzamiento
 %
-function out = genetic(S, replacement, N, K, maxGen, mut, back, selectionCrits, cross)
+function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectionCrits, cross)
     tic()
     layers = [2 11 8 1];
     popul = initializePopulation(N, layers);
@@ -37,24 +38,26 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, selectionCrits, 
     g{2} = @sigmoid;
     g{3} = @sigmoid;
     fitPlot = [];
+    meanFitPlot = [];
     for gen=1:maxGen
         if (mod(gen, genP) == 0)
             mutP = mutP * c;
         end
         fitness = calculateFitness(popul, S, layers, g);
         fitPlot(gen) = max(fitness);
+        meanFitPlot(gen) = mean(fitness);
         newPopul = cell(1, N);
         if (replacement == 1)
             %metodo 1
             for n=1:N/2
                  selected = selectionCrit(fitness, 2);
-                 [newPopul{2*n}, newPopul{2*n-1}] = cross(mutP, backP, popul{selected(1)}, popul{selected(2)}, layers, times, S);
+                 [newPopul{2*n}, newPopul{2*n-1}] = cross(crossP, mutP, backP, popul{selected(1)}, popul{selected(2)}, layers, times, S);
             end
         elseif (replacement == 2)
             %metodo 2
             selected = selectionCrit(fitness, K);
             for n=1:K/2
-                [newPopul{2*n}, newPopul{2*n-1}] = cross(mutP, backP, popul{selected(2*n)}, popul{selected(2*n-1)}, layers, times, S);
+                [newPopul{2*n}, newPopul{2*n-1}] = cross(crossP, mutP, backP, popul{selected(2*n)}, popul{selected(2*n-1)}, layers, times, S);
             end
             selectedOriginal = selectionCrit2(fitness, N-K);
             i = 1;
@@ -68,35 +71,42 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, selectionCrits, 
             childs = cell(1, K);
             interPopul = cell(1, K+N);
             for n=1:K/2
-                [childs{2*n}, childs{2*n-1}] = cross(mutP, backP, popul{selected(2*n)}, popul{selected(2*n-1)}, layers, times, S);
+                [childs{2*n}, childs{2*n-1}] = cross(crossP, mutP, backP, popul{selected(2*n)}, popul{selected(2*n-1)}, layers, times, S);
             end
             childsFitness = calculateFitness(childs, S, layers, g);
             for n=1:K
                 interPopul{n} = childs{n};
             end
-            i = 1;
-            for n=(K+1):N
-                interPopul{n} = popul{i};
-                i = i+1;
+            for n=(K+1):N+K
+                interPopul{n} = popul{n-K};
             end
             interFitness = [childsFitness fitness];
             selected = selectionCrit(interFitness, N);
-            for k=1:N
+            for n=1:N
                 newPopul{n} = interPopul{selected(n)};
             end
         end
-        popul = newPopul;
         figure(1);
         plot(fitPlot);
+        figure(2);
+        plot(meanFitPlot);
+        popul = newPopul;
     end
-%     plot(fitPlot);
-%     xlabel('generaciones', 'interpreter', 'latex');
-%     ylabel('valor de fitness', 'interpreter', 'latex');
-%     title('Fitness del mas apto', 'interpreter', 'latex');
+    
+        subplot(2,1,1)
+        plot(fitPlot);
+        xlabel('generaciones', 'interpreter', 'latex');
+        ylabel('valor de fitness', 'interpreter', 'latex');
+        title('Fitness del mas apto', 'interpreter', 'latex');
+        subplot(2,1,2)
+        plot(meanFitPlot);
+        xlabel('generaciones', 'interpreter', 'latex');
+        ylabel('valor de fitness', 'interpreter', 'latex');
+        title('Fitness promedio', 'interpreter', 'latex');
     fitness = calculateFitness(popul, S, layers, g);
     [m, i] = max(fitness);
     out = arrayToLayers(popul{i}, layers);
-    ecm = 1/m;
+    ecm = 1/m
     toc()
 end
 
