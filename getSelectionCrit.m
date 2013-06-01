@@ -9,8 +9,8 @@ function o = getSelectionCrit(i)
         case 4
             o = @boltzman;
         case 5
-            o = @mix-roulette;
+            o = @mixRoulette;
         case 6
-            o = @mix-boltzman;
+            o = @mixBoltzman;
     end
 end

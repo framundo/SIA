@@ -42,8 +42,10 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
     fitPlot = [];
     meanFitPlot = [];
     gen = 1;
+    x = [];
     while ~cut
         T = 100/gen;
+        x(gen)=gen;
         if (mod(gen, genP) == 0)
             mutP = mutP * c;
         end
@@ -91,14 +93,12 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
             end
         end
         figure(1);
-        plot(fitPlot);
-        figure(2);
-        plot(meanFitPlot);
+        plot(x, fitPlot, 'r', x, meanFitPlot, 'b');
         popul = newPopul;    	
         cut = gen > maxGen || fitPlot(gen) >= f;
-        gen=gen+1;
+        gen = gen+1;
     end
-    
+        figure(2);
         subplot(2,1,1)
         plot(fitPlot);
         xlabel('generaciones', 'interpreter', 'latex');
@@ -113,6 +113,7 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
     [m, i] = max(fitness);
     out = arrayToLayers(popul{i}, layers);
     ecm = 1/m
+    gen
     toc()
 end
 
