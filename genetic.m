@@ -37,7 +37,8 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, selectionCrits, 
     g{2} = @sigmoid;
     g{3} = @sigmoid;
     fitPlot = [];
-    for gen=1:maxGen
+    gen = 1;
+    while ~cut
 	T = 100/gen;
         if (mod(gen, genP) == 0)
             mutP = mutP * c;
@@ -89,6 +90,8 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, selectionCrits, 
         popul = newPopul;
         figure(1);
         plot(fitPlot);
+	gen=gen+1;
+	cut = gen > maxGen || fitPlot(gen) < err;
     end
 %     plot(fitPlot);
 %     xlabel('generaciones', 'interpreter', 'latex');
