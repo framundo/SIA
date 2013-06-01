@@ -1,14 +1,14 @@
-function [child1, child2] = paramCross(mutP, gen1, gen2)
+function [child1, child2] = paramCross(mutP, backP, gen1, gen2, layers, times, S)
     l = length(gen1);
     child1 = gen1;
     child2 = gen2;
     for k=1:l
         if (rand() > 0.7)
-            k
             aux = child1(k);
             child1(k) = child2(k);
             child2(k) = aux;
         end
     end
     [child1, child2] = mutate(mutP, child1, child2);
+    [child1, child2] = backProp(backP, child1, child2, layers, times, S);    
 end

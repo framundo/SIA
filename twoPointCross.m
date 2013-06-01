@@ -1,4 +1,4 @@
-function [child1, child2] = twoPointCross(mutP, gen1, gen2)
+function [child1, child2] = twoPointCross(mutP, backP, gen1, gen2, layers, times, S)
     l = length(gen1);
     n1 = fix(rand() * l)+1;
     while(1)
@@ -20,4 +20,5 @@ function [child1, child2] = twoPointCross(mutP, gen1, gen2)
         child2 = [gen2(1:n1) gen1(n1+1:n2) gen2(n2+1:l)];
     end
     [child1, child2] = mutate(mutP, child1, child2);
+    [child1, child2] = backProp(backP, child1, child2, layers, times, S);
 end

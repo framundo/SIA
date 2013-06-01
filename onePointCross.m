@@ -1,4 +1,4 @@
-function [child1, child2] = onePointCross(mutP, gen1, gen2)
+function [child1, child2] = onePointCross(mutP, backP, gen1, gen2, layers, times, S)
     l = length(gen1);
     n = fix(rand() * l)+1;
     if (n == l)
@@ -9,4 +9,5 @@ function [child1, child2] = onePointCross(mutP, gen1, gen2)
         child2 = [gen2(1:n) gen1(n+1:l)];
     end
     [child1, child2] = mutate(mutP, child1, child2);
+    [child1, child2] = backProp(backP, child1, child2, layers, times, S);
 end

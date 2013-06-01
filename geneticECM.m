@@ -11,4 +11,5 @@ function out = geneticECM(S, W, g, layers)
         p = p + 1;
     end
     out = out/(length(S));
+    out = 1/out;
 end

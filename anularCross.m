@@ -1,4 +1,4 @@
-function [child1, child2] = anularCross(mutP, gen1, gen2)
+function [child1, child2] = anularCross(mutP, backP, gen1, gen2, layers, times, S)
     l = length(gen1);
     child1 = gen1;
     child2 = gen2; 
@@ -10,4 +10,5 @@ function [child1, child2] = anularCross(mutP, gen1, gen2)
         child2(i) = gen1(i);
     end
     [child1, child2] = mutate(mutP, child1, child2);
+    [child1, child2] = backProp(backP, child1, child2, layers, times, S);
 end

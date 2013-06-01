@@ -10,7 +10,7 @@ function winners = tourney(fitness, K)
             j = aux;
             % J siempre es mas grande
         end
-        if (rand() > 0.75)
+        if (rand() < 0.75)
             winners(k) = j;
         else
             winners(k) = i;
