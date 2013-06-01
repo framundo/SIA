@@ -21,9 +21,11 @@
 %       5 = elite-ruleta
 %       6 = elite-boltzman
 %   cross = funcion de cruzamiento
+%   f = fitness pretendido
 %
-function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectionCrits, cross)
+function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectionCrits, cross, f)
     tic()
+    cut = 0;
     layers = [2 11 8 1];
     popul = initializePopulation(N, layers);
     genP = mut(3);
@@ -92,9 +94,9 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
         plot(fitPlot);
         figure(2);
         plot(meanFitPlot);
-        popul = newPopul;
-    	gen=gen+1;
-        cut = gen > maxGen || fitPlot(gen) < err;
+        popul = newPopul;    	
+        cut = gen > maxGen || fitPlot(gen) >= f;
+        gen=gen+1;
     end
     
         subplot(2,1,1)
