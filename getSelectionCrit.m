@@ -3,7 +3,7 @@ function o = getSelectionCrit(i)
         case 1
             o = @elitism;
         case 2
-            o = @rouette;
+            o = @roulette;
         case 3
             o = @tourney;
         case 4

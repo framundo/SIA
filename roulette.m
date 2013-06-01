@@ -1,4 +1,4 @@
-function roulette = roulette(fitness, K)
+function roulette = roulette(fitness, K, T)
     f = fitness;
     l = length(fitness);
     sorted = zeros(2,l);

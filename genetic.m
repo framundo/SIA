@@ -20,9 +20,11 @@
 %       5 = elite-ruleta
 %       6 = elite-boltzman
 %   cross = funcion de cruzamiento
+%   err = error pretendido
 %
-function out = genetic(S, replacement, N, K, maxGen, mut, back, selectionCrits, cross)
+function out = genetic(S, replacement, N, K, maxGen, mut, back, selectionCrits, cross, err)
     tic()
+    cut = 0;
     layers = [2 11 8 1];
     popul = initializePopulation(N, layers);
     genP = mut(3);
@@ -36,7 +38,7 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, selectionCrits, 
     g{1} = @sigmoid;
     g{2} = @sigmoid;
     g{3} = @sigmoid;
-    fitPlot = [];
+    fitPlot = zeros(maxGen);
     gen = 1;
     while ~cut
 	T = 100/gen;
