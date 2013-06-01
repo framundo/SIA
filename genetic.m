@@ -34,7 +34,7 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
     backP = back(1);
     times = back(2);
     selectionCrit = getSelectionCrit(selectionCrits(1));
-    selectionCrit2 = getSelectionCrit(selectionCrits(1));
+    selectionCrit2 = getSelectionCrit(selectionCrits(2));
     g = cell(1,3);
     g{1} = @sigmoid;
     g{2} = @sigmoid;
@@ -85,7 +85,7 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
                 interPopul{n} = popul{n-K};
             end
             interFitness = [childsFitness fitness];
-            selected = selectionCrit(interFitness, N, T);
+            selected = selectionCrit2(interFitness, N, T);
             for n=1:N
                 newPopul{n} = interPopul{selected(n)};
             end
