@@ -4,7 +4,7 @@ function [child1, child2] = anularCross(crossP, mutP, backP, gen1, gen2, layers,
     child2 = gen2; 
     if (rand() < crossP)
         n = fix(rand() * l)+1;
-        L = fix(rand() * l)+1;
+        L = fix(rand() * l/2)+1;
         for k=n:(n+L-1)
             i = mod(k,l)+1;
             child1(i) = gen2(i);

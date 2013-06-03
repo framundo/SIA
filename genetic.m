@@ -21,9 +21,15 @@
 %       5 = elite-ruleta
 %       6 = elite-boltzman
 %   cross = funcion de cruzamiento
-%   f = fitness pretendido
+%   f = fitness pretendido: corta si se alcanza
+%   fitestCond = condicion de corte de contenido: [fitChange, fitestGens]
+%       fitChange = cambio que debe haber para que corte
+%       fitestGens = cantidad de generaciones sin cambios
+%   meanCond = condiciond e corte por estructura: [meanChange, meanGens]
+%       meanChange = cambio que debe haber para que no corte
+%       meanGens = cantidad de generaciones sin cambios
 %
-function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectionCrits, cross, f)
+function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectionCrits, cross, f, fitestCond, meanCond)
     tic()
     cut = 0;
     layers = [2 11 8 1];
@@ -39,6 +45,12 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
     g{1} = @sigmoid;
     g{2} = @sigmoid;
     g{3} = @sigmoid;
+    fitChange = fitestCond(1);
+    fitGensMax = fitestCond(2);
+    fitGens = 0;
+    meanGens = 0;
+    meanChange = meanCond(1);
+    meanGensMax = meanCond(2);
     fitPlot = [];
     meanFitPlot = [];
     gen = 1;
@@ -94,8 +106,27 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
         end
         figure(1);
         plot(x, fitPlot, 'r', x, meanFitPlot, 'b');
-        popul = newPopul;    	
-        cut = gen > maxGen || fitPlot(gen) >= f;
+        popul = newPopul;
+        
+        if (fitGensMax ~= 0 && gen ~= 1 && abs(fitPlot(gen-1) - fitPlot(gen)) < fitChange)
+           fitGens = fitGens + 1;
+           if (fitGens >= fitGensMax)
+               cut = 1;
+               disp('corto por contenido')
+           end
+        else
+            fitGens = 0;
+        end
+        if (meanGensMax ~= 0 && ~cut && gen ~= 1 && abs(meanFitPlot(gen-1) - meanFitPlot(gen)) < meanChange)
+           meanGens = meanGens + 1;
+           if (meanGens >= meanGensMax)
+               cut = 1;
+               disp('corto por estructura')
+           end
+        else
+            meanGens = 0;
+        end
+        cut = cut || gen > maxGen || fitPlot(gen) >= f;
         gen = gen+1;
     end
         figure(2);

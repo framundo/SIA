@@ -1,4 +1,4 @@
-function winners = tourney(fitness, K)
+function winners = tourney(fitness, K, T)
     winners = zeros(1,K);
     l = length(fitness);
     for k=1:K

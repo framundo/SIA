@@ -1,6 +1,7 @@
-function roulette = roulette(fitness, K, T)
+function roul = roulette(fitness, K, T)
     f = fitness;
     l = length(fitness);
+    roul = [];
     sorted = zeros(2,l);
     F = sum(f);
     old = 0;
@@ -15,7 +16,7 @@ function roulette = roulette(fitness, K, T)
       r = rand();
       for j=1:l
         if(sorted(2,j)>r)
-          roulette(k)=sorted(1,j);
+          roul(k)=sorted(1,j);
           break;
         end
       end

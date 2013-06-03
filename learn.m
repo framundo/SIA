@@ -69,7 +69,7 @@ function W = learn(S, eta, func, layers, inLength, times, margin, b, adaptation,
 %     title('Error en la salida', 'interpreter', 'latex');
     
     toc()
-    ecm = calculateECM(cuad, S, t, W, g, layers, b, inLength, limitMult*limit, 0)
+    ecm = calculateECM(cuad, S, limit, W, g, layers, b, inLength, limitMult*limit, 0)
 end
 
 
