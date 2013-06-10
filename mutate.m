@@ -5,8 +5,8 @@ end
 
 function gen = innerMutate(mutP, gen)
     if (rand() < mutP)
-        disp('mutate!')
+%         disp('mutate!')
         n = fix(rand()*length(gen) +1);
-        gen(n) = rand() - 0.5;
+        gen(n) = (rand() - 0.5)*20;
     end
 end

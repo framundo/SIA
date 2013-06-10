@@ -6,6 +6,6 @@ function popul = initializePopulation(size, layers)
        for j=2:l
            len = len + layers(j) * (layers(j-1)+1);
        end
-       popul{k} = rand(1, len)-0.5;
+       popul{k} = (rand(1, len)-0.5)*10;
     end
 end

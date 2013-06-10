@@ -28,8 +28,8 @@
 %   meanCond = condiciond e corte por estructura: [meanChange, meanGens]
 %       meanChange = cambio que debe haber para que no corte
 %       meanGens = cantidad de generaciones sin cambios
-%
-function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectionCrits, cross, f, fitestCond, meanCond)
+%   fitnessOpt = modo de fitness : 1 para 1/ecm, 2 para -ecm
+function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectionCrits, cross, f, fitestCond, meanCond, fitnessOpt)
     tic()
     cut = 0;
     layers = [2 11 8 1];
@@ -53,17 +53,20 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
     meanGensMax = meanCond(2);
     fitPlot = [];
     meanFitPlot = [];
+    leastFitPlot = [];
     gen = 1;
     x = [];
     while ~cut
-        T = 100/gen;
+        gen;
+        T = maxGen/gen;
         x(gen)=gen;
         if (mod(gen, genP) == 0)
             mutP = mutP * c;
         end
-        fitness = calculateFitness(popul, S, layers, g);
+        fitness = calculateFitness(popul, S, layers, g, fitnessOpt);
         fitPlot(gen) = max(fitness);
         meanFitPlot(gen) = mean(fitness);
+        leastFitPlot(gen) = min(fitness);
         newPopul = cell(1, N);
         if (replacement == 1)
             %metodo 1
@@ -91,7 +94,7 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
             for n=1:K/2
                 [childs{2*n}, childs{2*n-1}] = cross(crossP, mutP, backP, popul{selected(2*n)}, popul{selected(2*n-1)}, layers, times, S);
             end
-            childsFitness = calculateFitness(childs, S, layers, g);
+            childsFitness = calculateFitness(childs, S, layers, g, fitnessOpt);
             for n=1:K
                 interPopul{n} = childs{n};
             end
@@ -104,10 +107,13 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
                 newPopul{n} = interPopul{selected(n)};
             end
         end
-        figure(1);
-        plot(x, fitPlot, 'r', x, meanFitPlot, 'b');
+         figure(2);
+         plot(x, fitPlot, '-', x, meanFitPlot, '-.', x, leastFitPlot, ':');
         popul = newPopul;
-        
+         xlabel('generaciones', 'interpreter', 'latex');
+         ylabel('valores de fitness', 'interpreter', 'latex');
+         title('Evolucion del fitness', 'interpreter', 'latex');
+         legend('Individuo mas apto', 'Promedio de la poblacion', 'Individuo menos apto');
         if (fitGensMax ~= 0 && gen ~= 1 && abs(fitPlot(gen-1) - fitPlot(gen)) < fitChange)
            fitGens = fitGens + 1;
            if (fitGens >= fitGensMax)
@@ -129,21 +135,25 @@ function out = genetic(S, replacement, N, K, maxGen, mut, back, crossP, selectio
         cut = cut || gen > maxGen || fitPlot(gen) >= f;
         gen = gen+1;
     end
-        figure(2);
-        subplot(2,1,1)
-        plot(fitPlot);
-        xlabel('generaciones', 'interpreter', 'latex');
-        ylabel('valor de fitness', 'interpreter', 'latex');
-        title('Fitness del mas apto', 'interpreter', 'latex');
-        subplot(2,1,2)
-        plot(meanFitPlot);
-        xlabel('generaciones', 'interpreter', 'latex');
-        ylabel('valor de fitness', 'interpreter', 'latex');
-        title('Fitness promedio', 'interpreter', 'latex');
-    fitness = calculateFitness(popul, S, layers, g);
+%         figure(2);
+%         subplot(2,1,1)
+%         plot(fitPlot);
+%         xlabel('generaciones', 'interpreter', 'latex');
+%         ylabel('valor de fitness', 'interpreter', 'latex');
+%         title('Fitness del mas apto', 'interpreter', 'latex');
+%         subplot(2,1,2)
+%         plot(meanFitPlot);
+%         xlabel('generaciones', 'interpreter', 'latex');
+%         ylabel('valor de fitness', 'interpreter', 'latex');
+%         title('Fitness promedio', 'interpreter', 'latex');
+    fitness = calculateFitness(popul, S, layers, g, fitnessOpt);
     [m, i] = max(fitness);
     out = arrayToLayers(popul{i}, layers);
-    ecm = 1/m
+    if (fitnessOpt == 1)
+        ecm = 1/m
+    elseif (fitnessOpt == 2)
+        ecm = -(m-10)
+    end
     gen
     toc()
 end

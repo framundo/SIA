@@ -1,13 +1,15 @@
-function boltzman = boltzman(fitness, K, T)
+function boltz = boltzman(fitness, K, T)
 	acum = 0;
-	count = 0;
-	for i=1:length(fitness)
-		acum = acum + fitness(i);
-		count = count + 1;
+    fNorm = fitness./max(fitness);
+    l = length(fitness);
+    f = zeros(1,l);
+	for i=1:l
+		acum = acum + exp(fNorm(i)/T);
+    end
+    acum = acum/l;
+	for i=1:l
+		f(i) = exp(fNorm(i)/T)/acum; 
+        %probar el T para que en el primer paso queden todos parecidos y vayan agrandandose las diferencias 
 	end
-	avg = acum/count;
-	for i=1:length(fitness)
-		fitness(i) = exp(fitness(i)/T)/(exp(acum/T)); %probar el T para que en el primer paso queden todos parecidos y vayan agrandandose las diferencias 
-	end
-	boltzman = roulette(fitness, K, T);
+	boltz = roulette(f, K, T);
 end

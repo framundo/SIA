@@ -1,5 +1,5 @@
 
-function out = geneticECM(S, W, g, layers)
+function out = geneticECM(S, W, g, layers, opt)
     l = length(layers);
     p = layers(1)+1;
     out = 0;
@@ -11,5 +11,10 @@ function out = geneticECM(S, W, g, layers)
         p = p + 1;
     end
     out = out/(length(S));
-    out = 1/out;
+    if (opt ==1)
+        out = 1/out;
+    elseif (opt ==2)
+        out = -out;
+        out = out+10;
+    end
 end
